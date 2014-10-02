@@ -13,7 +13,8 @@ OBJSNETAPP += \
 	obj/db_wrapper.o \
 	obj/db_mysql.o \
 	obj/action.o \
-	obj/class_map.o
+	obj/class_map.o \
+	obj/acl.o
 
 LD_LIBS += -lonep${ONEP_LBITS}_datapath
 

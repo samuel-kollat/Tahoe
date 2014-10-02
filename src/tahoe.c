@@ -61,6 +61,7 @@
 
 #include "filtering/class_map.h"
 #include "filtering/action.h"
+#include "filtering/acl.h" 
 
 #define FAIL false
 #define SUCCESS true
@@ -535,8 +536,6 @@ onep_status_t dpss_tutorial_create_ip_pmap (
     onep_policy_cmap_op_t *cmap_op,
     onep_acl_t ** acl)
 {
-    onep_ace_t *ace40 = 0;
-    onep_acl_t *onep_acl = 0;
     onep_collection_t *result_list = 0;
     onep_iterator_t *iter = 0;
     onep_policy_entry_op_t *entry_op;
@@ -549,71 +548,21 @@ onep_status_t dpss_tutorial_create_ip_pmap (
 
     // V2
     onep_policy_entry_op_t *entry_op_2;
-    //
+    // END
 
-    /* create a simple ACL, ip any any */
-    rc = onep_acl_create_l3_acl(AF_INET, elem, &onep_acl);
-    if(rc != ONEP_OK) {
-      fprintf(stderr, "\nError in onep_acl_create_l3_acl: %d, %s\n",
-            rc, onep_strerror(rc));
-      goto cleanup;
-   }
+    // V2
+    onep_ace_t *ace = 0;
+    onep_acl_t *onep_acl = 0;
 
-   //Create ACE40(seq=40, permit)
-    rc = onep_acl_create_l3_ace(40, TRUE, &ace40);
-    if(rc != ONEP_OK) {
-      fprintf(stderr, "\nError in onep_acl_create_l3_ace: %d, %s\n",
-            rc, onep_strerror(rc));
-      goto cleanup;
-   }
+    ace_init(40, &ace);
+    ace_add_ip(ace, NULL, 0, NULL, 0);
+    ace_add_protocol(ace, proto);
+    ace_add_port(ace, 0, ONEP_COMPARE_ANY, 0, ONEP_COMPARE_ANY);
 
-   //Set ACE40 src prefix
-    rc = onep_acl_set_l3_ace_src_prefix(ace40, NULL, 0);
-    if(rc != ONEP_OK) {
-      fprintf(stderr, "\nError in onep_acl_set_l3_ace_src_prefix : %d, %s\n",
-            rc, onep_strerror(rc));
-      goto cleanup;
-   }
+    acl_begin(elem, &onep_acl);
+    acl_finish(onep_acl, ace);
 
-   //Set ACE40 dest prefix
-    rc = onep_acl_set_l3_ace_dst_prefix(ace40, NULL, 0);
-    if(rc != ONEP_OK) {
-      fprintf(stderr, "\nError in onep_acl_set_l3_ace_dst_prefix: %d, %s\n",
-            rc, onep_strerror(rc));
-      goto cleanup;
-   }
-
-   //Set ACE40 dest port
-    rc = onep_acl_set_l3_ace_protocol(ace40, proto);
-    if(rc != ONEP_OK) {
-      fprintf(stderr, "\nError in onep_acl_set_l3_ace_protocol: %d, %s\n",
-            rc, onep_strerror(rc));
-      goto cleanup;
-   }
-
-   //Set ACE40 src port
-    rc = onep_acl_set_l3_ace_src_port(ace40, 0, ONEP_COMPARE_ANY);
-    if(rc != ONEP_OK) {
-      fprintf(stderr, "\nError in onep_acl_set_l3_ace_src_port: %d, %s\n",
-            rc, onep_strerror(rc));
-      goto cleanup;
-   }
-
-   //Set ACE40 dest port
-    rc = onep_acl_set_l3_ace_dst_port(ace40, 0, ONEP_COMPARE_ANY);
-    if(rc != ONEP_OK) {
-      fprintf(stderr, "\nError in onep_acl_set_l3_ace_dst_port: %d, %s\n",
-            rc, onep_strerror(rc));
-      goto cleanup;
-   }
-
-   //Add ACE40 to ACL
-   rc = onep_acl_add_ace(onep_acl, ace40);
-   if(rc != ONEP_OK) {
-      fprintf(stderr, "\nError in onep_acl_add_ace: %d, %s\n",
-            rc, onep_strerror(rc));
-      goto cleanup;
-   }
+    // END
 
    /*
     * Get traffic action table
