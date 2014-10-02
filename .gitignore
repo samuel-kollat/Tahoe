@@ -1,0 +1,5 @@
+bin/
+obj/
+*.pcap
+*.*~
+tutorial.properties

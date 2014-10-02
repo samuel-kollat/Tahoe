@@ -1,0 +1,28 @@
+Session Element Tutorial
+--------------------------
+
+The Session Element Tutorial will connect to a network element and display
+various information about that network element.  The system properties
+retrieved and displayed by the application are system description, product
+ID, and Serial number.
+
+Please follow ../README to set required environment variables.
+
+To build this tutorial:
+
+    cd sdk-c<version>/c/tutorials/SessionElement
+    make
+
+To run this tutorial:
+
+    ./bin/SessionElement -a <element hostname or address> \
+        [-t <transport type>] [-C <client cert file>] \
+        [-K <client private key file>] [-R <root certificates file>] \
+        [-P <tls pinning file>]
+
+    <transport type> can be 1 for TLS transport or 2 for TIPC transport.
+    TIPC transport can only be used in process hosted environments.
+
+    The "-C", "-K", and "-R" options are used for TLS transport.
+    For more imformation on the use of these options and TLS configuration,
+    please refer to the "Getting Started with onePK" document.

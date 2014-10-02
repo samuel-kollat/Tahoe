@@ -1,0 +1,1 @@
+-a 10.100.10.101 -i GigabitEthernet0/3 -R /home/samuel/cisco/cert/ca.pem

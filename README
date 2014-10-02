@@ -1,0 +1,110 @@
+(Datapath) Tahoe
+--------------------------
+
+Required Network Element Configuration:
+    *  username <username> privilege 15 password <password>
+    *  onep
+    *  datapath transport gre sender-id <sender-id> interface <interface>
+
+where 
+
+<sender-id> is a unique 32 bit identifier. This is to distinguish the network 
+element from all other elements that may want to connect to the same DPSS application.
+
+<interface> is the interface in which packets will be sent from the
+network element to the application.
+
+Set the following environment variables (not required inside the onePK All-in-One VM):
+
+     ONEP_SDK <installed_dir>/onep/c/sdk-c-<version>   
+
+      
+Modify dpss.conf:
+    (<installed_dir>/onep/c32/sdk-c32-<version>/c/bin/dpss.conf)
+    change following:
+    LOCAL_IP - to match IP address on which server expects packets
+    USER - User that the application should run as
+    GROUP - Name of group the app developer belongs to
+    TRANSPORT - Transport to use (it is "raw" for IOS)
+
+Run dpss_mp process:
+    (<installed_dir>/onep/c32/sdk-c32-<version>/c/bin/dpss_mp_<version>)
+    ./dpss_mp -c dpss.conf --fg &
+    
+To build this application:
+
+    cd src
+    make
+
+
+Configs required for process-hosted application (NXOS):
+=================================================
+
+NOTE : DataPath Applications are supported in a process-hosted mode on NXOS.
+       Please refer to ADT/container section of User Guide on steps to build your container. 
+       After you have built the container with DatapathTutorial binary in it and installed on the device,
+       you can run the tutorial from your container as given in "To run this tutorial" section at the end.
+
+
+Additional configuration will need to be applied to the network element
+for packets to be seen by the application:
+
+Required Network Element Configuration:
+    *  username <username> privilege 15 password <password>
+    *  onep
+    *  datapath transport mts
+
+
+To build this application:
+
+    cd src
+    make
+    
+    Note: You need to put this binary in your container filesystem before you create ova
+    
+    
+Run dpss_mp process:
+    dpss_mp should be running in your container, if not, you can start is as follows:
+    /usr/sbin/dpss_mp -c /etc/dpss.conf--fg -d all &
+    
+==========================================================
+
+To run this tutorial:
+
+    bin/tahoe -a <element hostname or address> \
+        -i <interface> 
+        [-p <protocol>] \
+        [-t <transport type>] [-C <client cert file>] \
+        [-K <client private key file>] [-R <root certificates file>] \
+        [-P <tls pinning file>]
+
+    Where <interface> is the interface on which packets will be sent from the
+    network element to the application (eg Ethernet1/2)
+
+    <transport type> can be 1 for TLS transport or 2 for TIPC transport.
+    TIPC transport can only be used in process hosted environments.
+
+    The "-C", "-K", and "-R" options are used for TLS transport.
+    For more imformation on the use of these options and TLS configuration,
+    please refer to the "Getting Started with onePK" document.
+
+    <protocol> is the integer specifying acl protocol
+     ONEP_PROTOCOL_ICMP = 1,
+     ONEP_PROTOCOL_IGMP = 2,
+     ONEP_PROTOCOL_TCP = 6,
+     ONEP_PROTOCOL_EGP = 8,
+     ONEP_PROTOCOL_IGRP = 9,
+     ONEP_PROTOCOL_UDP = 17,
+     ONEP_PROTOCOL_RSVP = 46,
+     ONEP_PROTOCOL_GRE = 47,
+     ONEP_PROTOCOL_ESP = 50,
+     ONEP_PROTOCOL_AH = 51,
+     ONEP_PROTOCOL_ALL = 256,
+          
+     
+     
+     To see options help:
+     bin/tahoe --help
+
+
+
