@@ -11,7 +11,9 @@ OBJSNETAPP += \
 	obj/tahoe.o \
 	obj/tahoe_util.o \
 	obj/db_wrapper.o \
-	obj/db_mysql.o
+	obj/db_mysql.o \
+	obj/action.o \
+	obj/class_map.o
 
 LD_LIBS += -lonep${ONEP_LBITS}_datapath
 
@@ -56,6 +58,14 @@ obj/db_wrapper.o: database/db_wrapper.c
 	@echo 'Invoking: GCC C Compiler'
 	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
 		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<" `mysql_config --cflags --libs`
+	@echo 'Finished building: $<'
+	@echo ' '
+
+obj/%.o: filtering/%.c
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C Compiler'
+	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
+		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
