@@ -14,7 +14,9 @@ OBJSNETAPP += \
 	obj/db_mysql.o \
 	obj/action.o \
 	obj/class_map.o \
-	obj/acl.o
+	obj/acl.o \
+	obj/router.o \
+	obj/print_info.o
 
 LD_LIBS += -lonep${ONEP_LBITS}_datapath
 
@@ -63,6 +65,22 @@ obj/db_wrapper.o: database/db_wrapper.c
 	@echo ' '
 
 obj/%.o: filtering/%.c
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C Compiler'
+	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
+		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+obj/%.o: utils/%.c
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C Compiler'
+	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
+		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+obj/%.o: processing/print_info/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
 	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
