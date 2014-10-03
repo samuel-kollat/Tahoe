@@ -205,3 +205,28 @@ onep_status_t router_get_table( onep_network_element_t *elem,           // Netwo
         
     return rc;
 }
+
+//
+void router_print_intf_list(onep_collection_t *intf_list,   // List of interfaces
+                            FILE *op )                      // File to print
+{
+    onep_status_t rc;
+    unsigned int count;
+    onep_network_interface_t* intf;
+    onep_if_name name;
+
+    onep_collection_get_size(intf_list, &count);
+    if (count>0) {
+        unsigned int i;
+        for (i = 0; i < count; i++) {
+            rc = onep_collection_get_by_index(intf_list, i, (void *)&intf);
+            if (rc==ONEP_OK) {
+                rc = onep_interface_get_name(intf,name);
+                fprintf(op, "[%d] Interface [%s]\n", i, name);
+            } else {
+               fprintf(stderr, "Error getting interface. code[%d], text[%s]\n",
+               rc, onep_strerror(rc));
+            }
+        }
+    }
+}

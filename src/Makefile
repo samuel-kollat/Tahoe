@@ -13,6 +13,7 @@ OBJSNETAPP += \
 	obj/db_wrapper.o \
 	obj/db_mysql.o \
 	obj/action.o \
+	obj/policy_map.o \
 	obj/class_map.o \
 	obj/acl.o \
 	obj/router.o \

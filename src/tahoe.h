@@ -35,6 +35,7 @@
 // Database
 #include "database/db_wrapper.h"
 // Filtering
+#include "filtering/policy_map.h"
 #include "filtering/class_map.h"
 #include "filtering/action.h"
 #include "filtering/acl.h"

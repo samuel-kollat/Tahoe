@@ -6,33 +6,6 @@
 
 #include "tahoe.h"
 
-/*
- * Display a list of interfaces.
- */
-void dpss_tutorial_display_intf_list(onep_collection_t *intf_list, FILE *op)
-{
-    onep_status_t rc;
-    unsigned int count;
-    onep_network_interface_t* intf;
-    onep_if_name name;
-
-    onep_collection_get_size(intf_list, &count);
-    if (count>0) {
-        unsigned int i;
-        for (i = 0; i < count; i++) {
-            rc = onep_collection_get_by_index(intf_list, i, (void *)&intf);
-            if (rc==ONEP_OK) {
-                rc = onep_interface_get_name(intf,name);
-                fprintf(op, "[%d] Interface [%s]\n", i, name);
-            } else {
-               fprintf(stderr, "Error getting interface. code[%d], text[%s]\n",
-               rc, onep_strerror(rc));
-            }
-        }
-    }
-}
-
-
 // START SNIPPET: get_class
 /*
  * Example function to create a simple ACL and Policy Map
@@ -49,8 +22,6 @@ onep_status_t dpss_tutorial_create_ip_pmap (
     onep_policy_cmap_op_t *cmap_op,
     onep_acl_t ** acl)
 {
-    onep_collection_t *result_list = 0;
-    onep_iterator_t *iter = 0;
     onep_policy_entry_op_t *entry_op;
     onep_policy_match_holder_t *mh = 0;
     onep_policy_match_t *match = 0;
@@ -63,7 +34,8 @@ onep_status_t dpss_tutorial_create_ip_pmap (
     onep_policy_entry_op_t *entry_op_2;
     // END
 
-    // V2
+    //
+    // Create ACL
     onep_ace_t *ace = 0;
     onep_acl_t *onep_acl = 0;
 
@@ -75,44 +47,21 @@ onep_status_t dpss_tutorial_create_ip_pmap (
     acl_begin(elem, &onep_acl);
     acl_finish(onep_acl, ace);
 
-    // END
-
-   /*
-    * Get traffic action table
-    */
+    //
+    // Get traffic action table
     rc = router_get_table(elem, &tables, &table_cap);
     if(rc != ONEP_OK) {
       goto cleanup;
     }
     
-
-    /*
-     * Create a policy using the class just created.
-     */
-
-    /* 1. Create the op_list */
-    rc = onep_policy_pmap_op_list_new(&pmap_op_list);
-    if(rc != ONEP_OK) {
-      fprintf(stderr, "\nError in onep_policy_pmap_op_list_new: %d, %s\n",
-            rc, onep_strerror(rc));
-      goto cleanup;
-    }
-
-    /* 2. Add the network element */
-    rc = onep_policy_op_add_network_element(pmap_op_list, elem);
-    if(rc != ONEP_OK) {
-      fprintf(stderr, "\nError in onep_policy_op_add_network_element: %d, %s\n",
-            rc, onep_strerror(rc));
-      goto cleanup;
-    }
-
-    /* 3. Add pmap create operation to list */
-    rc = onep_policy_pmap_op_create(pmap_op_list, table_cap, &pmap_op);
-    if(rc != ONEP_OK) {
-      fprintf(stderr, "\nError in onep_policy_pmap_op_create: %d, %s\n",
-            rc, onep_strerror(rc));
-      goto cleanup;
-    }
+    //
+    // Create a policy
+    policy_map_begin(
+        elem,
+        table_cap,
+        &pmap_op_list,
+        &pmap_op
+    );
 
     /* 4. Add an entry */
     if(onep_policy_table_cap_supports_sequence_insertion(table_cap)){ 
@@ -168,52 +117,63 @@ onep_status_t dpss_tutorial_create_ip_pmap (
     }
 
     if (onep_policy_table_cap_supports_cmap(table_cap)) {
-        /*
-         * Create a classes.
-         */
+        //
+        // Create a classes.
 
-        // V2
+        // Class : 1
         //onep_policy_op_list_t *cmap_op_list = NULL;
         //onep_policy_cmap_op_t *cmap_op = NULL;
         //onep_policy_match_holder_t *mh = NULL;
 
-        class_map_begin(elem,
-                        table_cap,
-                        ONEP_POLICY_CMAP_ATTR_MATCH_ALL,
-                        &cmap_op_list,
-                        &cmap_op,
-                        &mh);
+        class_map_begin(
+            elem,
+            table_cap,
+            ONEP_POLICY_CMAP_ATTR_MATCH_ALL,
+            &cmap_op_list,
+            &cmap_op,
+            &mh
+        );
 
-        class_map_add_acl(  mh,
-                            (onep_policy_access_list_t *)onep_acl);
+        class_map_add_acl(
+            mh,
+            (onep_policy_access_list_t *)onep_acl
+        );
 
-        class_map_add_l7_protocol(  mh,
-                                    "dns");
+        class_map_add_l7_protocol(
+            mh,
+            "dns"
+        );
 
-        class_map_finish(   cmap_op_list,
-                            cmap_op,
-                            &entry_op);
-        // END
+        class_map_finish(
+            cmap_op_list,
+            cmap_op,
+            &entry_op
+        );
 
-        // V2
+        // Class : 2
         onep_policy_op_list_t *cmap_op_list_2 = NULL;
         onep_policy_cmap_op_t *cmap_op_2 = NULL;
         onep_policy_match_holder_t *mh_2 = NULL;
 
-        class_map_begin(elem,
-                        table_cap,
-                        ONEP_POLICY_CMAP_ATTR_MATCH_ALL,
-                        &cmap_op_list_2,
-                        &cmap_op_2,
-                        &mh_2);
+        class_map_begin(
+            elem,
+            table_cap,
+            ONEP_POLICY_CMAP_ATTR_MATCH_ALL,
+            &cmap_op_list_2,
+            &cmap_op_2,
+            &mh_2
+        );
 
-        class_map_add_l7_protocol(  mh_2,
-                                    "http");
+        class_map_add_l7_protocol(  
+            mh_2,
+            "http"
+        );
 
-        class_map_finish(   cmap_op_list_2,
-                            cmap_op_2,
-                            &entry_op_2);
-        // END
+        class_map_finish(   
+            cmap_op_list_2,
+            cmap_op_2,
+            &entry_op_2
+        );
 
     // TODO: refactor ELSE
     } else {
@@ -240,57 +200,27 @@ onep_status_t dpss_tutorial_create_ip_pmap (
         }
     }
 
-    /* 6. Try and add an action */
-    // V2
-    action_add( entry_op,
-                ONEP_DPSS_ACTION_COPY,
-                callback);
-    // END
+    //
+    // Add callbacks to actions
+    action_add( 
+        entry_op,
+        ONEP_DPSS_ACTION_COPY,
+        callback
+    );
 
-    // V2
-    action_add( entry_op_2,
-                ONEP_DPSS_ACTION_COPY,
-                callback);
-    // END
+    action_add(
+        entry_op_2,
+        ONEP_DPSS_ACTION_COPY,
+        callback
+    );
 
-    /* 7. Submit the operation. */
-    rc = onep_policy_op_update(pmap_op_list);
-   
-    if(rc != ONEP_OK) {
-       fprintf(stderr, "\nError in onep_policy_op_update: %d, %s\n",
-             rc, onep_strerror(rc));
-       goto cleanup;
-    }
-
-    /* 8. Find the pmap_handle we just created */
-    rc = onep_policy_op_list_get_list(pmap_op_list, &result_list);
-    if(rc != ONEP_OK) {
-      fprintf(stderr, "\nError in onep_policy_op_list_get_list: %d, %s\n",
-            rc, onep_strerror(rc));
-      goto cleanup;
-    }
-
-    rc = onep_collection_get_iterator(result_list, &iter);
-    if(rc != ONEP_OK) {
-      fprintf(stderr, "\nError in onep_collection_get_iterator: %d, %s\n",
-            rc, onep_strerror(rc));
-      goto cleanup;
-    }
-    
-   
-    pmap_op = (onep_policy_pmap_op_t *)onep_iterator_next(iter);
-        if (!pmap_op) {
-          fprintf(stderr, "Error in getting pmap_op\n");
-          rc = ONEP_FAIL;
-          goto cleanup;
-         }
-
-    rc = onep_policy_pmap_op_get_handle(pmap_op, pmap_handle);
-        if(rc != ONEP_OK) {
-          fprintf(stderr, "\nError in onep_policy_pmap_op_get_handle: %d, %s\n",
-                rc, onep_strerror(rc));
-          goto cleanup;
-    }
+    //
+    // Policy map
+    policy_map_finish(
+        pmap_op,
+        pmap_op_list,
+        pmap_handle
+    );
 
 
    /* Return the acl we created */
@@ -416,7 +346,7 @@ int main (int argc, char* argv[]) {
     /*
      * Display the interfaces we retrieved
      */
-    dpss_tutorial_display_intf_list(intfs,stderr);
+    router_print_intf_list(intfs, stderr);
 
     /*
      * Register some packet handlers.

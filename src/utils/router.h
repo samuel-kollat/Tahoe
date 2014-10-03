@@ -15,3 +15,8 @@
 onep_status_t router_get_table( onep_network_element_t *elem,           // Network element
                                 onep_collection_t **tables,             // RETURN | Tables
                                 onep_policy_table_cap_t **table_cap );  // RETURN | Datapath table
+
+//
+// Display a list of interfaces.
+void router_print_intf_list(onep_collection_t *intf_list,   // List of interfaces
+                            FILE *op );                     // File to print
