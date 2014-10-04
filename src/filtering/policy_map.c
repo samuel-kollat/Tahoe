@@ -97,3 +97,68 @@ void policy_map_finish( onep_policy_pmap_op_t *pmap_op,             // Policy ma
 
     return;
 }
+
+//
+void policy_map_add_entry(  onep_policy_table_cap_t *table_cap,     // Router table
+                            onep_policy_pmap_op_t *pmap_op,         // Policy map operation
+                            uint32_t sequence,                      // Sequence number
+                            onep_policy_entry_op_t **entry_op )     // RETURN | Entry operation
+{
+    // 0. Local variables
+    onep_policy_entry_op_t *entry_op_tmp;
+    onep_status_t rc = ONEP_OK;
+
+    // 1. Add entry according to table options
+    if(onep_policy_table_cap_supports_sequence_insertion(table_cap)){ 
+        rc = onep_policy_pmap_op_entry_insert_sequence(pmap_op, sequence, &entry_op_tmp);
+        if(rc != ONEP_OK) {
+            fprintf(stderr, "\nError in onep_policy_pmap_op_entry_insert_sequence: %d, %s\n",
+                rc, onep_strerror(rc));
+            goto cleanup;
+        }
+    } else {
+        rc = onep_policy_pmap_op_entry_insert_end(pmap_op, &entry_op_tmp);
+        if(rc != ONEP_OK) {
+            fprintf(stderr, "\nError in onep_policy_pmap_op_entry_insert_end: %d, %s\n",
+                rc, onep_strerror(rc));
+            goto cleanup;
+        }
+    }
+
+    // 2. Prepare out values
+    *entry_op = entry_op_tmp;
+
+    cleanup:
+
+    return;
+}
+
+//
+void policy_map_try_set_persistent( onep_policy_table_cap_t *table_cap,     // Router table
+                                    onep_policy_pmap_op_t *pmap_op,         // Policy map operation
+                                    char* pmap_name )                       // Name of policy map
+{
+    // 0. Local variables
+    onep_status_t rc = ONEP_OK;
+
+    // 1. Try set persistent policy map
+    if (onep_policy_table_cap_supports_persistent(table_cap)) {
+        rc =  onep_policy_pmap_op_set_persistent(pmap_op, pmap_name);
+        if(rc != ONEP_OK) {
+            fprintf(stderr, "\nError in onep_policy_pmap_op_set_persistent: %d, %s\n",
+                rc, onep_strerror(rc));
+            goto cleanup;
+        }
+    } else {
+        rc =  onep_policy_pmap_op_set_transient(pmap_op);
+        if(rc != ONEP_OK) {
+            fprintf(stderr, "\nError in onep_policy_pmap_op_set_transient: %d, %s\n",
+                rc, onep_strerror(rc));
+            goto cleanup;
+        }
+    }
+
+    cleanup:
+
+    return;
+}

@@ -22,3 +22,16 @@ void policy_map_begin(  onep_network_element_t *elem,           // Network eleme
 void policy_map_finish( onep_policy_pmap_op_t *pmap_op,             // Policy map operation
                         onep_policy_op_list_t *pmap_op_list,        // Policy map operation list
                         onep_policy_pmap_handle_t *pmap_handle );   // RETURN | Policy map handle
+
+//
+//
+void policy_map_add_entry(  onep_policy_table_cap_t *table_cap,     // Router table
+                            onep_policy_pmap_op_t *pmap_op,         // Policy map operation
+                            uint32_t sequence,                      // Sequence number
+                            onep_policy_entry_op_t **entry_op );    // RETURN | Entry operation
+
+//
+//
+void policy_map_try_set_persistent( onep_policy_table_cap_t *table_cap,     // Router table
+                                    onep_policy_pmap_op_t *pmap_op,         // Policy map operation
+                                    char* pmap_name );                      // Name of policy map
