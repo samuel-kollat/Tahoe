@@ -98,3 +98,7 @@ TApiStatus AddL7ProtocolToFilter(
         TFilterData* filter,        // Target filter
         TL7Protocol protocol        // Type of protocol
     );
+
+TApiStatus DeployFiltersToElement(
+        // TODO
+    );

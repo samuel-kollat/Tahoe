@@ -128,3 +128,9 @@ TApiStatus AddL7ProtocolToFilter(TFilterData* filter,
     filter->protocol = protocol;
     return API_OK;
 }
+
+TApiStatus DeployFiltersToElement()
+{
+    // TODO
+    return API_OK;
+}
