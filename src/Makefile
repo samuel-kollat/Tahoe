@@ -17,15 +17,16 @@ OBJSNETAPP += \
 	obj/class_map.o \
 	obj/acl.o \
 	obj/router.o \
-	obj/print_info.o
+	obj/print_info.o \
+	obj/api.o
 
 LD_LIBS += -lonep${ONEP_LBITS}_datapath
 
 # All Target
 # To build DatapathTutorial: "make bin/DatapathTutorial"
-all: makedirs bin/tahoe 
+all: makedirs bin/tahoe
 
-# Add inputs and outputs from these tool invocations to the build variables 
+# Add inputs and outputs from these tool invocations to the build variables
 
 makedirs:
 	@if [ ! -d obj ] ; then mkdir obj ; fi
@@ -46,7 +47,7 @@ bin/tahoe: makedirs makeutil $(OBJSNETAPP)
 
 # Other Targets
 clean:
-	-$(RM) -rf obj bin 
+	-$(RM) -rf obj bin
 	-@echo ' '
 
 obj/db_mysql.o: database/mysql/db_mysql.c
