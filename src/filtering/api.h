@@ -8,6 +8,10 @@
 #include "class_map.h"
 #include "policy_map.h"
 
+#include "onep_core_services.h"
+
+#include "session_element_util.h"
+
 #define NONDEF -1;
 
 // Return codes of API
@@ -54,7 +58,30 @@ typedef struct FilterItem {
 typedef struct {
     TFilterItem* head;
     int count;
+    onep_policy_pmap_handle_t pmap_handle;
+    onep_dpss_pak_callback_t callback;
 } TFilterList;
+
+// Item in list of interfaces
+typedef struct InterfaceItem {
+    onep_network_interface_t* interface;
+    struct InterfaceItem* next;
+} TInterfaceItem;
+
+// Network element structure
+typedef struct
+{
+    onep_session_handle_t* sh;
+    char* hostname;
+    char* login;
+    char* password;
+    char* url;
+    char* transport_type;
+    onep_network_element_t* ne;
+    onep_collection_t* interfaces;
+    TInterfaceItem* interface_list;     // Head of list
+    onep_policy_op_list_t* target_op_list;
+} TNetworkElement;
 
 // Global list of filters
 TFilterList FilterList;
@@ -99,6 +126,37 @@ TApiStatus AddL7ProtocolToFilter(
         TL7Protocol protocol        // Type of protocol
     );
 
+//
+TApiStatus SetCallbackToFilters(
+        onep_dpss_pak_callback_t callback
+    );
+
+//
 TApiStatus DeployFiltersToElement(
-        // TODO
+        TNetworkElement* element
+    );
+
+//
+TApiStatus InitializeNetworkElement(
+        char* hostname,
+        char* login,
+        char* password,
+        char* url,
+        char* transport_type,
+        TNetworkElement** element
+    );
+
+//
+TApiStatus ConnectToNetworkElement(
+        TNetworkElement* element
+    );
+
+//
+TApiStatus SetInterfaceOnNetworkElement(
+        TNetworkElement* element,
+        char* interface
+    );
+
+TApiStatus GetInterfacesOnNetworkElement(
+        TNetworkElement* element
     );
