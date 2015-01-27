@@ -51,6 +51,7 @@ TApiStatus InsertToList(TFilterData* filter)
     item->next = old_head;
 
     FilterList.head = item;
+    FilterList.count++;
     return API_OK;
 }
 
@@ -315,4 +316,183 @@ TApiStatus GetInterfacesOnNetworkElement(TNetworkElement* element)
     }
 
     return API_OK;
+}
+
+TApiStatus GenerateFilters(TNetworkElement* element)
+{
+    TApiStatus s;
+    onep_status_t rc;
+    onep_collection_t* tables = NULL;
+    onep_policy_table_cap_t* table_cap = 0;
+    onep_policy_pmap_op_t* pmap_op = NULL;
+    onep_policy_op_list_t* pmap_op_list = NULL;
+    onep_policy_op_list_t* cmap_op_list = NULL;
+
+    // Get traffic action table
+    rc = router_get_table(element->ne, &tables, &table_cap);
+    if(rc != ONEP_OK) {
+        PrintErrorMessage("GenerateFilters", "action table");
+        return API_ERROR;
+    }
+
+    // Init policy map
+    policy_map_begin(
+        element->ne,
+        table_cap,
+        &pmap_op_list,
+        &pmap_op
+    );
+
+    // Create class map for every filter item
+    unsigned entry_number = 100;
+    TFilterItem* filter = FilterList.head;
+    while(filter != NULL)
+    {
+        TFilterData* data = filter->data;
+
+        onep_policy_entry_op_t *entry_op;
+
+        // Add entry to policy map
+        policy_map_add_entry(
+            table_cap,
+            pmap_op,
+            entry_number,
+            &entry_op
+        );
+        entry_number++;
+
+        // Add rules
+        onep_policy_op_list_t *cmap_op_list = NULL;
+        onep_policy_cmap_op_t *cmap_op = NULL;
+        onep_policy_match_holder_t *mh = NULL;
+
+        // Begin class map
+        class_map_begin(
+            element->ne,
+            table_cap,
+            ONEP_POLICY_CMAP_ATTR_MATCH_ALL,
+            entry_op,
+            "onep-tahoe-cmap-1",                        // TODO
+            &cmap_op_list,
+            &cmap_op,
+            &mh
+        );
+
+        // Add ACL
+        onep_acl_t* acl = NULL;
+        s = GenerateALC(data, &acl);
+        if(s != API_OK)
+        {
+            PrintErrorMessage("GenerateFilters", "ACL");
+            return API_ERROR;
+        }
+
+        class_map_add_acl(
+            mh,
+            (onep_policy_access_list_t *)acl
+        );
+
+        // L7 protocol
+        char* proto_str = NULL;
+        s = L7ProtocolToString(data->protocol, &proto_str);
+        if(s != API_OK)
+        {
+            PrintErrorMessage("GenerateFilters", "protocol string");
+            return API_ERROR;
+        }
+
+        class_map_add_l7_protocol(
+            mh,
+            proto_str
+        );
+
+        // Class map finish
+        class_map_finish(
+            table_cap,
+            cmap_op_list,
+            cmap_op,
+            &entry_op
+        );
+
+        // Add action
+        action_add(
+            entry_op,
+            ONEP_DPSS_ACTION_COPY,
+            FilterList.callback
+        );
+
+        filter = filter->next;
+    }
+
+    // Try to set policy map persistent with name
+    policy_map_try_set_persistent(
+        table_cap,
+        pmap_op,
+        "onep-tahoe-pmap"
+    );
+
+    // Finish policy map
+    policy_map_finish(
+        pmap_op,
+        pmap_op_list,
+        &(FilterList.pmap_handle)
+    );
+
+    // Clean up
+    if(cmap_op_list) {
+        rc = onep_policy_op_list_destroy(&cmap_op_list);
+        if(rc != ONEP_OK) {
+            // Warning only
+            PrintErrorMessage("GenerateFilters", "Destroy: cmap_op_list");
+        }
+    }
+    if(pmap_op_list) {
+        rc = onep_policy_op_list_destroy(&pmap_op_list);
+        if(rc != ONEP_OK) {
+            // Warning only
+            PrintErrorMessage("GenerateFilters", "Destroy: cmap_op_list");
+        }
+    }
+
+    return API_OK;
+}
+
+TApiStatus GenerateALC(TFilterData* data, onep_acl_t** acl)
+{
+    *acl = NULL;
+    return API_OK;
+}
+
+TApiStatus L7ProtocolToString(TL7Protocol protocol, char** value)
+{
+    *value = "";
+    TApiStatus s = API_OK;
+
+    switch(protocol)
+    {
+        case HTTP:
+            *value = "http";
+            break;
+        case DNS:
+            *value = "dns";
+            break;
+        case DHCP:
+            *value = "dhcp";
+            break;
+        case CIFS:
+            *value = "cifs";
+            break;
+        case RTP:
+            *value = "rtp";
+            break;
+        case RTCP:
+            *value = "rtcp";
+            break;
+        default:
+            *value = "";
+            s = API_ERROR;
+            break;
+    }
+
+    return s;
 }

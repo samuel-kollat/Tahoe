@@ -10,6 +10,7 @@
 
 #include "onep_core_services.h"
 
+#include "../utils/router.h"
 #include "session_element_util.h"
 
 #define NONDEF -1;
@@ -88,16 +89,17 @@ typedef struct
 // Global list of filters
 TFilterList FilterList;
 
+//
 void PrintErrorMessage(
         char* dst,              // Identifier of procedure
         char* msg               // Error message for user
     );
 
-//
+// Public
 TApiStatus InitializeFilters(
     );
 
-//
+// Public
 TApiStatus GetEmptyFilter(
         TFilterData** filter    // Placeholder for filter reference
     );
@@ -107,7 +109,7 @@ TApiStatus InsertToList(
         TFilterData* filter     // Filter to insert
     );
 
-//
+// Public
 TApiStatus AddIPv4ToFilter(
         TFilterData* filter,        // Target filter
         TIPAddressType addr_type,   // Type of address in flow
@@ -115,30 +117,30 @@ TApiStatus AddIPv4ToFilter(
         int ip_mask                 // IP mask (0-32)
     );
 
-//
+// Public
 TApiStatus AddPortToFilter(
         TFilterData* filter,        // Target filter
         TIPAddressType addr_type,   // Type of port in flow
         int port                    // Port (0-65535)
     );
 
-//
+// Public
 TApiStatus AddL7ProtocolToFilter(
         TFilterData* filter,        // Target filter
         TL7Protocol protocol        // Type of protocol
     );
 
-//
+// Public
 TApiStatus SetCallbackToFilters(
         TApiCallback callback
     );
 
-//
+// Public
 TApiStatus DeployFiltersToElement(
         TNetworkElement* element
     );
 
-//
+// Public
 TApiStatus InitializeNetworkElement(
         char* hostname,
         char* login,
@@ -148,12 +150,12 @@ TApiStatus InitializeNetworkElement(
         TNetworkElement** element
     );
 
-//
+// Public
 TApiStatus ConnectToNetworkElement(
         TNetworkElement* element
     );
 
-//
+// Public
 TApiStatus SetInterfaceOnNetworkElement(
         TNetworkElement* element,
         char* interface
@@ -161,4 +163,21 @@ TApiStatus SetInterfaceOnNetworkElement(
 
 TApiStatus GetInterfacesOnNetworkElement(
         TNetworkElement* element
+    );
+
+//
+TApiStatus GenerateFilters(
+        TNetworkElement* element
+    );
+
+//
+TApiStatus GenerateALC(
+        TFilterData* data,
+        onep_acl_t** acl
+    );
+
+//
+TApiStatus L7ProtocolToString(
+        TL7Protocol protocol,
+        char** value
     );
