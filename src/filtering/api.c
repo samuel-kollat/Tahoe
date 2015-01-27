@@ -131,9 +131,9 @@ TApiStatus AddL7ProtocolToFilter(TFilterData* filter,
     return API_OK;
 }
 
-TApiStatus SetCallbackToFilters(onep_dpss_pak_callback_t callback)
+TApiStatus SetCallbackToFilters(TApiCallback callback)
 {
-    FilterList.callback = callback;
+    FilterList.callback = (onep_dpss_pak_callback_t)callback;
     return API_OK;
 }
 

@@ -14,6 +14,8 @@
 
 #define NONDEF -1;
 
+typedef onep_dpss_pak_callback_t TApiCallback;
+
 // Return codes of API
 typedef enum {
     API_OK,
@@ -128,7 +130,7 @@ TApiStatus AddL7ProtocolToFilter(
 
 //
 TApiStatus SetCallbackToFilters(
-        onep_dpss_pak_callback_t callback
+        TApiCallback callback
     );
 
 //
