@@ -30,15 +30,15 @@ onep_status_t dpss_create_filtering_rules(  onep_network_element_t *elem,       
     // Create ACL
     onep_ace_t *ace = 0;
     onep_acl_t *onep_acl = 0;
-
+printf("x1\n");
     ace_init(40, &ace);
     ace_add_ip(ace, NULL, 0, NULL, 0);
     ace_add_protocol(ace, proto);
     ace_add_port(ace, 0, ONEP_COMPARE_ANY, 0, ONEP_COMPARE_ANY);
-
+printf("x2\n");
     acl_begin(elem, &onep_acl);
     acl_finish(onep_acl, ace);
-
+printf("x3\n");
     // **********
     // Get traffic action table
     rc = router_get_table(elem, &tables, &table_cap);
@@ -62,7 +62,7 @@ onep_status_t dpss_create_filtering_rules(  onep_network_element_t *elem,       
         200,
         &entry_op_1
     );
-
+printf("x4\n");
     // Add entry for class map
     policy_map_add_entry(
         table_cap,
@@ -77,7 +77,7 @@ onep_status_t dpss_create_filtering_rules(  onep_network_element_t *elem,       
         pmap_op,
         "onep-tahoe-pmap"
     );
-
+printf("x5\n");
     // **********
     // Create class maps
 
@@ -113,7 +113,7 @@ onep_status_t dpss_create_filtering_rules(  onep_network_element_t *elem,       
         cmap_op_1,
         &entry_op_1
     );
-
+printf("x6\n");
     // Class : 2
     onep_policy_op_list_t *cmap_op_list_2 = NULL;
     onep_policy_cmap_op_t *cmap_op_2 = NULL;
@@ -141,7 +141,7 @@ onep_status_t dpss_create_filtering_rules(  onep_network_element_t *elem,       
         cmap_op_2,
         &entry_op_2
     );
-
+printf("x7\n");
     // **********
     // Add callbacks to actions
     action_add( 
@@ -149,13 +149,13 @@ onep_status_t dpss_create_filtering_rules(  onep_network_element_t *elem,       
         ONEP_DPSS_ACTION_COPY,
         callback
     );
-
+printf("x9\n");
     action_add(
         entry_op_2,
         ONEP_DPSS_ACTION_COPY,
         callback
     );
-
+printf("x10\n");
     // **********
     // Finish policy map creation
     policy_map_finish(
@@ -163,7 +163,7 @@ onep_status_t dpss_create_filtering_rules(  onep_network_element_t *elem,       
         pmap_op_list,
         pmap_handle
     );
-
+printf("x8\n");
 
     // TODO: refactor
 
@@ -195,6 +195,22 @@ onep_status_t dpss_create_filtering_rules(  onep_network_element_t *elem,       
 
 /* Main application  */
 int main (int argc, char* argv[]) {
+
+  /* configuration file parser */
+
+  char* config_filename = "config.dat";
+
+  parse_config(config_filename);
+
+  TMApplication* app = get_application(1);
+  app->filter = get_application_filters(1);
+
+  printf("%s\n", app->filter->name);
+
+
+   exit(0);
+
+
    onep_session_handle_t* sh;
    uint64_t pak_count, last_pak_count = 0;
    int timeout = 60;
@@ -306,7 +322,7 @@ int main (int argc, char* argv[]) {
    }
 
    // My
-   rc = onep_element_get_interface_by_name(ne, "GigabitEthernet0/2", &intf2);
+   rc = onep_element_get_interface_by_name(ne, "GigabitEthernet0/0", &intf2);
    if (rc != ONEP_OK) {
       fprintf(stderr, "Error in getting interface: %s\n", onep_strerror(rc));
       goto cleanup;
@@ -332,7 +348,7 @@ int main (int argc, char* argv[]) {
         ne,
         the_callback_handler,
         &pmap_handle
-    );
+    ); // <<<--- TU TO PADA
 
     if(rc != ONEP_OK) {
       goto cleanup;

@@ -4,6 +4,9 @@
  *-----------------------------------------------------------------
  */
 
+// configuration file
+#include "utils/config.h"
+
 #include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
