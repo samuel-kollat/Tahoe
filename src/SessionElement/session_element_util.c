@@ -26,7 +26,7 @@
 
 #include "onep_core_services.h"
 
-#include "session_element_util.h"
+#include "include/session_element_util.h"
 
 // Size of buffer for authentication prompt
 #define LINE_SIZE (ONEP_USERNAME_SIZE > ONEP_PASSWORD_SIZE ? \
