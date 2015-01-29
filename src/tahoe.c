@@ -202,8 +202,8 @@ int main (int argc, char* argv[]) {
 
   parse_config(config_filename);
 
-  TMApplication* app = get_application(1);
-  app->filter = get_application_filters(1);
+  TMApplication* app = get_application(config->application_id);
+  app->filter = get_application_filters(config->application_id);
 
   printf("%s\n", app->filter->name);
 
