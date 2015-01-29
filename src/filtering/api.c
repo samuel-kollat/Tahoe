@@ -31,6 +31,7 @@ TApiStatus GetEmptyFilter(TFilterData** filter)
     (*filter)->dst_mask = NONDEF;
     (*filter)->src_port = NONDEF;
     (*filter)->dst_port = NONDEF;
+    (*filter)->l3_protocol = 256;  // TODO
     (*filter)->protocol = NONE;
 
     return InsertToList(*filter);
@@ -380,7 +381,7 @@ TApiStatus GenerateFilters(TNetworkElement* element)
 
         // Add ACL
         onep_acl_t* acl = NULL;
-        s = GenerateALC(data, &acl);
+        s = GenerateALC(element, data, &acl);
         if(s != API_OK)
         {
             PrintErrorMessage("GenerateFilters", "ACL");
@@ -457,9 +458,66 @@ TApiStatus GenerateFilters(TNetworkElement* element)
     return API_OK;
 }
 
-TApiStatus GenerateALC(TFilterData* data, onep_acl_t** acl)
+TApiStatus GenerateALC(TNetworkElement* element,
+    TFilterData* data, onep_acl_t** acl)
 {
     *acl = NULL;
+    onep_ace_t *ace = 0;
+    bool empty = true;
+
+    ace_init(ACENumber++, &ace);  // Global: ACENumber
+
+    if(data->src_ip != NULL || data->dst_ip != NULL)
+    {
+        int src_mask = 0;
+        int dst_mask = 0;
+        if(data->src_mask != NONDEF )
+        {
+            src_mask = data->src_mask;
+        }
+        if(data->dst_mask != NONDEF )
+        {
+            dst_mask = data->dst_mask;
+        }
+
+        ace_add_ip(ace, data->src_ip, src_mask, data->dst_ip, dst_mask);
+        empty = false;
+    }
+
+    // Port
+    if(data->src_port != 0 || data->dst_port != 0)
+    {
+        int src_port = 0;
+        unsigned src_cmp = ONEP_COMPARE_ANY;
+        int dst_port = 0;
+        unsigned dst_cmp = ONEP_COMPARE_ANY;
+
+        if(data->src_port != 0)
+        {
+            src_port = data->src_port;
+            src_cmp = ONEP_COMPARE_EQ;
+        }
+
+        if(data->dst_port != 0)
+        {
+            dst_port = data->dst_port;
+            dst_cmp = ONEP_COMPARE_EQ;
+        }
+
+        ace_add_port(ace, src_port, src_cmp, dst_port, dst_cmp);
+        empty = false;
+    }
+
+    // Protocol
+    ace_add_protocol(ace, data->l3_protocol);   // TODO
+
+    // Create ACL if needed
+    if(!empty)
+    {
+        acl_begin(element->ne, acl);
+        acl_finish(*acl, ace);
+    }
+
     return API_OK;
 }
 

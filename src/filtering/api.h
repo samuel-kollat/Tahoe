@@ -13,7 +13,7 @@
 #include "../utils/router.h"
 #include "session_element_util.h"
 
-#define NONDEF -1;
+#define NONDEF (-1)
 
 typedef onep_dpss_pak_callback_t TApiCallback;
 
@@ -47,6 +47,7 @@ typedef struct {
     int dst_mask;               // Destination IP address mask
     int src_port;               // Source port
     int dst_port;               // Destination port
+    onep_acl_protocol_e l3_protocol;
     TL7Protocol protocol;       // Protocol
 } TFilterData;
 
@@ -88,6 +89,9 @@ typedef struct
 
 // Global list of filters
 TFilterList FilterList;
+
+// Global ACE number
+int ACENumber = 10;
 
 //
 void PrintErrorMessage(
@@ -172,6 +176,7 @@ TApiStatus GenerateFilters(
 
 //
 TApiStatus GenerateALC(
+        TNetworkElement* element,
         TFilterData* data,
         onep_acl_t** acl
     );
