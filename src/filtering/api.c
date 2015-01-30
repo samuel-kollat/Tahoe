@@ -1,8 +1,11 @@
 #include "api.h"
 
+int ACEIdNumber = 10;
+
 void PrintErrorMessage(char* dst, char* msg)
 {
-    fprintf(stderr, "Error in API (%s): %s", dst, msg);
+    fprintf(stderr, "Error in API (%s): %s\n", dst, msg);
+    return;
 }
 
 //
@@ -31,8 +34,9 @@ TApiStatus GetEmptyFilter(TFilterData** filter)
     (*filter)->dst_mask = NONDEF;
     (*filter)->src_port = NONDEF;
     (*filter)->dst_port = NONDEF;
-    (*filter)->l3_protocol = 256;  // TODO
+    (*filter)->l3_protocol = ONEP_PROTOCOL_ALL;
     (*filter)->protocol = NONE;
+    (*filter)->default_filter = false;
 
     return InsertToList(*filter);
 }
@@ -126,6 +130,40 @@ TApiStatus AddPortToFilter(TFilterData* filter,
     return API_OK;
 }
 
+TApiStatus AddL3ProtocolToFilter(TFilterData* filter,
+    TL3Protocol protocol)
+{
+    onep_acl_protocol_e onep_proto;
+
+    switch(protocol)
+    {
+        case ICMP:
+            onep_proto = ONEP_PROTOCOL_ICMP;
+            break;
+        case IGMP:
+            onep_proto = ONEP_PROTOCOL_IGMP;
+            break;
+        case TCP:
+            onep_proto = ONEP_PROTOCOL_TCP;
+            break;
+        case UDP:
+            onep_proto = ONEP_PROTOCOL_UDP;
+            break;
+        default:
+            onep_proto = ONEP_PROTOCOL_ALL;
+            break;
+    }
+
+    filter->l3_protocol = onep_proto;
+    return API_OK;
+}
+
+TApiStatus AddDefaultFilter(TFilterData* filter)
+{
+    filter->default_filter = true;
+    return API_OK;
+}
+
 TApiStatus AddL7ProtocolToFilter(TFilterData* filter,
     TL7Protocol protocol)
 {
@@ -144,7 +182,12 @@ TApiStatus DeployFiltersToElement(TNetworkElement* element)
     onep_status_t rc;
 
     // Create filtering rules
-    // TODO
+    TApiStatus s = GenerateFilters(element);
+    if(s != API_OK)
+    {
+        PrintErrorMessage("DeployFiltersToElement", "generate filters");
+        return API_ERROR;
+    }
 
     // Create operation list and set it to interface
     rc = onep_policy_target_op_list_new(&(element->target_op_list));
@@ -188,6 +231,8 @@ TApiStatus DeployFiltersToElement(TNetworkElement* element)
             PrintErrorMessage("DeployFiltersToElement", onep_strerror(rc));
             return API_ERROR;
         }
+
+        next = next->next;
     }
 
     // Update policy on router
@@ -328,6 +373,7 @@ TApiStatus GenerateFilters(TNetworkElement* element)
     onep_policy_pmap_op_t* pmap_op = NULL;
     onep_policy_op_list_t* pmap_op_list = NULL;
     onep_policy_op_list_t* cmap_op_list = NULL;
+    int cmap_counter = 0;
 
     // Get traffic action table
     rc = router_get_table(element->ne, &tables, &table_cap);
@@ -388,24 +434,31 @@ TApiStatus GenerateFilters(TNetworkElement* element)
             return API_ERROR;
         }
 
-        class_map_add_acl(
-            mh,
-            (onep_policy_access_list_t *)acl
-        );
+        if(acl != NULL)
+        {
+            class_map_add_acl(
+                mh,
+                (onep_policy_access_list_t *)acl
+            );
+        }
+
 
         // L7 protocol
         char* proto_str = NULL;
-        s = L7ProtocolToString(data->protocol, &proto_str);
-        if(s != API_OK)
+        if(data->protocol != NONE)
         {
-            PrintErrorMessage("GenerateFilters", "protocol string");
-            return API_ERROR;
-        }
+            s = L7ProtocolToString(data->protocol, &proto_str);
+            if(s != API_OK)
+            {
+                PrintErrorMessage("GenerateFilters", "protocol string");
+                return API_ERROR;
+            }
 
-        class_map_add_l7_protocol(
-            mh,
-            proto_str
-        );
+            class_map_add_l7_protocol(
+                mh,
+                proto_str
+            );
+        }
 
         // Class map finish
         class_map_finish(
@@ -422,6 +475,7 @@ TApiStatus GenerateFilters(TNetworkElement* element)
             FilterList.callback
         );
 
+        cmap_counter++;
         filter = filter->next;
     }
 
@@ -465,7 +519,12 @@ TApiStatus GenerateALC(TNetworkElement* element,
     onep_ace_t *ace = 0;
     bool empty = true;
 
-    ace_init(ACENumber++, &ace);  // Global: ACENumber
+    ace_init(ACEIdNumber++, &ace);  // Global: ACEIdNumber
+
+    if(data->default_filter)
+    {
+        empty = false;
+    }
 
     if(data->src_ip != NULL || data->dst_ip != NULL)
     {
@@ -483,22 +542,27 @@ TApiStatus GenerateALC(TNetworkElement* element,
         ace_add_ip(ace, data->src_ip, src_mask, data->dst_ip, dst_mask);
         empty = false;
     }
+    else
+    {
+        // Set up default prefix for any other ACE record
+        ace_add_ip(ace, NULL, 0, NULL, 0);
+    }
 
     // Port
-    if(data->src_port != 0 || data->dst_port != 0)
+    if(data->src_port != NONDEF || data->dst_port != NONDEF)
     {
         int src_port = 0;
         unsigned src_cmp = ONEP_COMPARE_ANY;
         int dst_port = 0;
         unsigned dst_cmp = ONEP_COMPARE_ANY;
 
-        if(data->src_port != 0)
+        if(data->src_port != NONDEF)
         {
             src_port = data->src_port;
             src_cmp = ONEP_COMPARE_EQ;
         }
 
-        if(data->dst_port != 0)
+        if(data->dst_port != NONDEF)
         {
             dst_port = data->dst_port;
             dst_cmp = ONEP_COMPARE_EQ;
@@ -507,9 +571,18 @@ TApiStatus GenerateALC(TNetworkElement* element,
         ace_add_port(ace, src_port, src_cmp, dst_port, dst_cmp);
         empty = false;
     }
+    else
+    {
+        // Default ports
+        ace_add_port(ace, 0, ONEP_COMPARE_ANY, 0, ONEP_COMPARE_ANY);
+    }
 
     // Protocol
-    ace_add_protocol(ace, data->l3_protocol);   // TODO
+    ace_add_protocol(ace, data->l3_protocol);
+    if(data->l3_protocol != ONEP_PROTOCOL_ALL)
+    {
+        empty = false;
+    }
 
     // Create ACL if needed
     if(!empty)

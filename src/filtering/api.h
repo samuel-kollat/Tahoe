@@ -1,3 +1,6 @@
+#ifndef __TAHOE_BACKEND_API__
+#define __TAHOE_BACKEND_API__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,6 +42,15 @@ typedef enum {
     RTCP
 } TL7Protocol;
 
+// Indentifier of L3 protocol
+typedef enum {
+    ALL,
+    ICMP,
+    IGMP,
+    TCP,
+    UDP
+} TL3Protocol;
+
 // Data for class map entry
 typedef struct {
     struct sockaddr* src_ip;    // Source IP address
@@ -49,6 +61,7 @@ typedef struct {
     int dst_port;               // Destination port
     onep_acl_protocol_e l3_protocol;
     TL7Protocol protocol;       // Protocol
+    bool default_filter;        // Default filter settings
 } TFilterData;
 
 // Item in list of filtering rules
@@ -91,7 +104,7 @@ typedef struct
 TFilterList FilterList;
 
 // Global ACE number
-int ACENumber = 10;
+extern int ACEIdNumber;
 
 //
 void PrintErrorMessage(
@@ -132,6 +145,17 @@ TApiStatus AddPortToFilter(
 TApiStatus AddL7ProtocolToFilter(
         TFilterData* filter,        // Target filter
         TL7Protocol protocol        // Type of protocol
+    );
+
+// Public
+TApiStatus AddL3ProtocolToFilter(
+        TFilterData* filter,        // Target filter
+        TL3Protocol protocol        // Type of protocol
+    );
+
+// Public
+TApiStatus AddDefaultFilter(
+        TFilterData* filter         // Target filter
     );
 
 // Public
@@ -186,3 +210,5 @@ TApiStatus L7ProtocolToString(
         TL7Protocol protocol,
         char** value
     );
+
+#endif

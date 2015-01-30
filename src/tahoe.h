@@ -37,22 +37,19 @@
 #include "include/tahoe_util.h"
 // Database
 #include "database/db_wrapper.h"
-// Filtering
-#include "filtering/policy_map.h"
-#include "filtering/class_map.h"
-#include "filtering/action.h"
-#include "filtering/acl.h"
 // Utils
 #include "utils/router.h"
 // Processing
 #include "processing/print_info/print_info.h"
+
+// Backend API
+#include "filtering/api.h"
 
 
 #define FAIL false
 #define SUCCESS true
 #define DPSS_ACTION_MAX_LEN (20)
 
-static onep_network_element_t*  ne = NULL;
 onep_policy_global_cap_t *global_cap = NULL;
 onep_policy_cap_filter_t *filter_cap = NULL;
 onep_collection_t *tables = NULL;

@@ -69,7 +69,7 @@ void ace_init(  int sequence,       // Sequence number
 }
 
 //
-void ace_add_ip(onep_ace_t *ace,                // ACE  
+void ace_add_ip(onep_ace_t *ace,                // ACE
                 struct sockaddr *src_prefix,    // Source IP prefix
                 uint16_t src_length,            // Source IP prefix length
                 struct sockaddr *dst_prefix,    // Destination IP prefix
@@ -101,7 +101,7 @@ void ace_add_ip(onep_ace_t *ace,                // ACE
 }
 
 //
-void ace_add_protocol(  onep_ace_t *ace,                // ACE 
+void ace_add_protocol(  onep_ace_t *ace,                // ACE
                         onep_acl_protocol_e protocol )  // L3 protocol
 {
     // 0. Local variables
