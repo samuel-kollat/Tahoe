@@ -78,6 +78,12 @@ TMApplication* get_application_mysql(int application_id)
 
 TMFilter* get_application_filters(int application_id)
 {
+	/*TMFilter* filter = (TMFilter*)malloc(sizeof(TMFilter));
+	filter->name = "15";
+	printf("1>%s\n", filter->name);
+
+	return filter;*/
+
 	int retc;
 	TMFilter* return_filter = NULL;
 	if(con==NULL)
@@ -97,21 +103,167 @@ TMFilter* get_application_filters(int application_id)
 	if(mysql_num_rows(result)==0)
 		return NULL;	
 
-	MYSQL_ROW* row;
+	MYSQL_ROW row;
 	TMFilter* filter;
 	while((row = mysql_fetch_row(result)))
-	{
+	{		
 		TMFilter* last_filter = filter;
-		filter = (TMFilter*)malloc(sizeof(TMFilter));
+		filter = (TMFilter*)malloc(sizeof(TMFilter));		
 		if(filter==NULL)
 			return NULL;
+
+		filter->next=NULL;
+
 		if(return_filter==NULL)
 			return_filter = filter;
 		else
-			filter->next = filter;
+			last_filter->next = filter;
+
 		filter->id = atoi(row[0]);
-		string_cpy(filter->name, row[1]);
+		string_cpy(&(filter->name), row[1]);
+		filter->access_list = get_filter_access_lists(filter->id);
+		filter->nbar_protocol = get_filter_nbar_protocols(filter->id);
+
+	}
+	mysql_free_result(result);
+	return (TMFilter*)return_filter;
+}
+
+TMAccess_list* get_filter_access_lists(int filter_id)
+{
+	int retc;
+	TMAccess_list* return_acl = NULL;
+	if(con==NULL)
+		if((retc=init_database())==0)
+			return retc;
+
+	char query_buffer[QUERY_BUFFER_SIZE];
+
+	sprintf(query_buffer, " \
+		SELECT access_list.id, access_list.action, access_list.protocol, \
+		SRC.address as src_address, SRC.wildcard as src_wildcard,\
+		DST.address as dst_address, DST.wildcard as dst_wildcard, \
+		ports.greater_or_equal, ports.less_or_equal \
+		FROM access_list \
+		LEFT JOIN ip_network SRC \
+			ON access_list.ip_source = SRC.id \
+		LEFT JOIN ip_network DST \
+			ON access_list.ip_destination = DST.id \
+		LEFT JOIN ports \
+			ON access_list.ports_id = ports.id \
+		WHERE access_list.filter_id='%d'; \
+		", filter_id);
+
+	mysql_query(con, query_buffer);
+
+	printf("%s\n", mysql_error(con));
+
+	MYSQL_RES* result = mysql_store_result(con);
+	printf("FACnum-rows: %d\n", mysql_num_rows(result));
+
+	if(mysql_num_rows(result)==0)
+		return NULL;	
+
+	MYSQL_ROW row;
+	TMAccess_list* acl;
+
+	while((row = mysql_fetch_row(result)))
+	{		
+		TMAccess_list* last_acl = acl;
+		acl = (TMAccess_list*)malloc(sizeof(TMAccess_list));		
+		if(acl==NULL)
+			return NULL;
+
+		acl->next=NULL;
+
+		if(return_acl==NULL)
+			return_acl = acl;
+		else
+			last_acl->next = acl;
+
+		//filter->id = atoi(row[0]);
+		acl->id = atoi(row[0]);
+		if(strcmp(row[1], "permit")==0)
+			acl->action = PERMIT;
+		else
+			acl->action = DENY;
+		string_cpy(&(acl->protocol), row[2]);
+
+		acl->ip_source = (TMIp_network*)malloc(sizeof(TMIp_network));
+		acl->ip_destination = (TMIp_network*)malloc(sizeof(TMIp_network));
+		if(acl->ip_source==NULL || acl->ip_destination==NULL)
+			return NULL;
+		string_cpy(&(acl->ip_source->address), row[3]);
+		string_cpy(&(acl->ip_source->wildcard), row[4]);
+
+		string_cpy(&(acl->ip_destination->address), row[5]);
+		string_cpy(&(acl->ip_destination->wildcard), row[6]);
+
+		acl->ports = (TMPorts*)malloc(sizeof(TMPorts));
+		if(acl->ports==NULL)
+			return NULL;
+
+		acl->ports->greater_or_equal = atoi(row[7]);
+		acl->ports->less_or_equal = atoi(row[8]);
 	}
 
-	return (TMFilter*)return_filter;
+	mysql_free_result(result);
+
+	return (TMAccess_list*)return_acl;
+}
+
+TMNbar_protocol* get_filter_nbar_protocols(int filter_id)
+{
+	int retc;
+	TMNbar_protocol* return_nbar_protocol = NULL;
+	if(con==NULL)
+		if((retc=init_database())==0)
+			return retc;
+
+	char query_buffer[QUERY_BUFFER_SIZE];
+
+	sprintf(query_buffer, " \
+		SELECT nbar_protocol.id, nbar_protocol.protocol_name, nbar_protocol.protocol_description, \
+		nbar_protocol.protocol_id \
+		FROM nbar_protocol \
+		LEFT JOIN filter_has_nbar_protocol ON filter_has_nbar_protocol.filter_id = '%d' \
+		AND filter_has_nbar_protocol.nbar_protocol_id = nbar_protocol.id; \
+		", filter_id);
+
+	mysql_query(con, query_buffer);
+
+	printf("%s\n", mysql_error(con));
+
+	MYSQL_RES* result = mysql_store_result(con);
+	printf("NBPnum-rows: %d\n", mysql_num_rows(result));
+
+	if(mysql_num_rows(result)==0)
+		return NULL;	
+
+	MYSQL_ROW row;
+	TMNbar_protocol* nbar_protocol;
+
+	while((row = mysql_fetch_row(result)))
+	{		
+		TMNbar_protocol* last_nbar_protocol = nbar_protocol;
+		nbar_protocol = (TMNbar_protocol*)malloc(sizeof(TMNbar_protocol));		
+		if(nbar_protocol==NULL)
+			return NULL;
+
+		nbar_protocol->next=NULL;
+
+		if(return_nbar_protocol==NULL)
+			return_nbar_protocol = nbar_protocol;
+		else
+			last_nbar_protocol->next = nbar_protocol;
+
+		nbar_protocol->id = atoi(row[0]);
+		string_cpy(&(nbar_protocol->protocol_name), row[1]);
+		string_cpy(&(nbar_protocol->protocol_description), row[2]);
+		string_cpy(&(nbar_protocol->protocol_id), row[3]);
+
+		printf("last_nbar_protocol %d nbar_protocol %d next %d\n", last_nbar_protocol, nbar_protocol, nbar_protocol->next);
+
+	}
+	return (TMNbar_protocol*) return_nbar_protocol;
 }

@@ -8,14 +8,43 @@ typedef struct certificate {
 	char* data;	
 } TMCertificate;
 
+typedef struct ip_network {
+	char* address;
+	char* wildcard;
+} TMIp_network;
+
+typedef struct ports {
+	int greater_or_equal;
+	int less_or_equal;
+} TMPorts;
+
+typedef enum {
+	PERMIT,
+	DENY
+} acl_actions;
 
 struct access_list;
-typedef struct access_list TMAcl;
+typedef struct access_list TMAccess_list;
 // TABLE access_list
 typedef struct access_list {
 	int id;
-	TMAcl* next;
-} TMAcl;
+	acl_actions action;
+	char* protocol;
+	TMIp_network* ip_source;
+	TMIp_network* ip_destination;
+	TMPorts* ports;
+	TMAccess_list* next;
+} TMAccess_list;
+
+struct nbar_protocol;
+typedef struct nbar_protocol TMNbar_protocol;
+typedef struct nbar_protocol {
+	int id;
+	char* protocol_name;
+	char* protocol_description;
+	char* protocol_id;
+	TMNbar_protocol* next;	
+} TMNbar_protocol;
 
 struct filter;
 typedef struct filter TMFilter;
@@ -23,8 +52,9 @@ typedef struct filter TMFilter;
 typedef struct filter {
 	int id;
 	char* name;
-	TMAcl* access_list;	// list of access lists
+	TMAccess_list* access_list;	// list of access lists
 	TMFilter* next;
+	TMNbar_protocol* nbar_protocol;
 } TMFilter;
 
 // TABLE analyzer
