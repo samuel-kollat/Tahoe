@@ -1,3 +1,6 @@
+#ifndef __TAHOE_BACKEND_API__
+#define __TAHOE_BACKEND_API__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,7 +16,7 @@
 #include "../utils/router.h"
 #include "session_element_util.h"
 
-#define NONDEF -1;
+#define NONDEF (-1)
 
 typedef onep_dpss_pak_callback_t TApiCallback;
 
@@ -39,6 +42,15 @@ typedef enum {
     RTCP
 } TL7Protocol;
 
+// Indentifier of L3 protocol
+typedef enum {
+    ALL,
+    ICMP,
+    IGMP,
+    TCP,
+    UDP
+} TL3Protocol;
+
 // Data for class map entry
 typedef struct {
     struct sockaddr* src_ip;    // Source IP address
@@ -47,7 +59,9 @@ typedef struct {
     int dst_mask;               // Destination IP address mask
     int src_port;               // Source port
     int dst_port;               // Destination port
+    onep_acl_protocol_e l3_protocol;
     TL7Protocol protocol;       // Protocol
+    bool default_filter;        // Default filter settings
 } TFilterData;
 
 // Item in list of filtering rules
@@ -89,6 +103,9 @@ typedef struct
 // Global list of filters
 TFilterList FilterList;
 
+// Global ACE number
+extern int ACEIdNumber;
+
 //
 void PrintErrorMessage(
         char* dst,              // Identifier of procedure
@@ -128,6 +145,17 @@ TApiStatus AddPortToFilter(
 TApiStatus AddL7ProtocolToFilter(
         TFilterData* filter,        // Target filter
         TL7Protocol protocol        // Type of protocol
+    );
+
+// Public
+TApiStatus AddL3ProtocolToFilter(
+        TFilterData* filter,        // Target filter
+        TL3Protocol protocol        // Type of protocol
+    );
+
+// Public
+TApiStatus AddDefaultFilter(
+        TFilterData* filter         // Target filter
     );
 
 // Public
@@ -172,6 +200,7 @@ TApiStatus GenerateFilters(
 
 //
 TApiStatus GenerateALC(
+        TNetworkElement* element,
         TFilterData* data,
         onep_acl_t** acl
     );
@@ -181,3 +210,5 @@ TApiStatus L7ProtocolToString(
         TL7Protocol protocol,
         char** value
     );
+
+#endif
