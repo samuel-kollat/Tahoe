@@ -212,27 +212,21 @@ int main (int argc, char* argv[]) {
     */
 
 
-
     application_filter = application_filter->next;
   }
 
-  printf("-- Filters: Successfully created\n");
+  // if there are no filters for the application
+  if(application->filter==NULL)
+  {
+    // Create new filter
+    TFilterData* filter;
+    s = GetEmptyFilter(&filter);
 
-  // Create new filter
-  TFilterData* filter;
-  s = GetEmptyFilter(&filter);
+    // Filter for any data
+    s = AddDefaultFilter(filter);
+  }
 
-  // Filter for any data
-  //s = AddDefaultFilter(filter);
-
-  // Fill it with data. No need to fill every item
-  //s = AddIPv4ToFilter(filter, SRC, "192.168.0.1", 0);
-  //s = AddPortToFilter(filter, DST, 53);
-  //s = AddL3ProtocolToFilter(filter, UDP);
-  //s = AddL7ProtocolToFilter(filter, DNS);
-
-  // Create another new filter and fill it
-  // ...
+  printf("-- Filters: Successfully created\n"); 
 
   // Set callback for packet processing
   TApiCallback callback = proc_pi_callback;
@@ -271,14 +265,6 @@ int main (int argc, char* argv[]) {
     // get next router
     router = router->next;
   }
-
-  // Set another interface
-  // ...
-
-  //printf("-- Filters: Deploying\n");
-
-  // Deploy to the network element
-  //s = DeployFiltersToElement(element);
 
   printf ("-- Filters: Done\n");
 

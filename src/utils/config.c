@@ -18,7 +18,6 @@ int string_cpy(char** destination, char* source)
 
 TConfig* parse_config(char* config_filename)
 {
-
 	FILE* config_fd = fopen(config_filename, "r");
 	if(config_fd==NULL)
 		exit(EXIT_FAILURE);
@@ -37,8 +36,10 @@ TConfig* parse_config(char* config_filename)
 		// skip empty lines
 		if(strlen(line)<3)
 			continue;
+
 		// remove last new-line character
-		line[strlen(line)-1] = 0;
+		if(line[strlen(line)-1]=='\r' || line[strlen(line)-1]=='\n')
+			line[strlen(line)-1] = 0;
 
 		if(line[0]=='[')
 			state = 0;
@@ -98,10 +99,11 @@ TConfig* parse_config(char* config_filename)
 		{
 			char* left = strtok(line, "=");
 			char* right = strtok(NULL, "=");
+
 			if(strcmp(left,"id")==0)
 			{
 				config->application_id = atoi(right);
-			}
+			}printf("a\n");
 		}
 		/*
 		// [DATAPATH]
