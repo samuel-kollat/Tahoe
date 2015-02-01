@@ -11,4 +11,5 @@ TMApplication* get_application_mysql(int);
 TMFilter* get_application_filters(int);
 TMAccess_list* get_filter_access_lists(int);
 TMNbar_protocol* get_filter_nbar_protocols(int);
+TMRouter* get_application_routers(int);
 int init_database();	

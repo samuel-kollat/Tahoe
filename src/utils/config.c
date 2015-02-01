@@ -34,8 +34,15 @@ TConfig* parse_config(char* config_filename)
 
 	while((cfread = getline(&line, &cflen, config_fd)) != -1)
 	{
+		// skip empty lines
+		if(strlen(line)<3)
+			continue;
 		// remove last new-line character
 		line[strlen(line)-1] = 0;
+
+		if(line[0]=='[')
+			state = 0;
+		
 		if(strcmp(line, "[DATABASE]")==0)
 		{
 			state = 1;	// change state to database section
@@ -47,6 +54,13 @@ TConfig* parse_config(char* config_filename)
 		{
 			state = 2;	// change state to application section
 		}
+		/*else if(strcmp(line, "[DATAPATH]")==0)
+		{
+			state = 3;	// change state to datapath section
+			config->datapath = malloc(sizeof(TConfigDpInfo));
+			if(config->datapath==NULL)
+				exit(EXIT_FAILURE);
+		}*/
 		// [DATABASE]
 		else if(state==1)
 		{
@@ -88,6 +102,39 @@ TConfig* parse_config(char* config_filename)
 			{
 				config->application_id = atoi(right);
 			}
+		}
+		/*
+		// [DATAPATH]
+		else if(state==3)
+		{
+			char* left = strtok(line, "=");
+			char* right = strtok(NULL, "=");
+			if(strcmp(left,"username")==0)
+			{
+				string_cpy(&(config->datapath->username), right);
+			}
+			else if(strcmp(left,"password")==0)
+			{
+				string_cpy(&(config->datapath->password), right);
+			}
+			else if(strcmp(left,"ip")==0)
+			{
+				string_cpy(&(config->datapath->ip), right);
+			}
+			else if(strcmp(left,"interface")==0)
+			{
+				string_cpy(&(config->datapath->interface), right);
+			}
+			else if(strcmp(left,"local_cert")==0)
+			{
+				string_cpy(&(config->datapath->local_cert), right);
+			}
+			else if(strcmp(left,"remote_cert")==0)
+			{
+				string_cpy(&(config->datapath->remote_cert), right);
+			}
+		}*/ else {
+
 		}
 	}
 }

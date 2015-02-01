@@ -8,9 +8,21 @@ typedef struct certificate {
 	char* data;	
 } TMCertificate;
 
+struct router;
+typedef struct router TMRouter;
+typedef struct router {
+	int id;
+	char* management_ip;
+	char* name;
+	char* username;
+	char* password;
+	char* interfaces;
+	TMRouter* next;
+} TMRouter;
+
 typedef struct ip_network {
 	char* address;
-	char* wildcard;
+	int mask;
 } TMIp_network;
 
 typedef struct ports {
@@ -69,6 +81,7 @@ typedef struct application {
 	TMCertificate* certificate;
 	TMAnalyzer* analyzer;
 	TMFilter* filter;
+	TMRouter* router;
 } TMApplication;
 
 #endif

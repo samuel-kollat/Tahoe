@@ -17,8 +17,19 @@ typedef struct dbinfo {
 	char* schema;
 } TConfigDbInfo;
 
+
+/*typedef struct dpinfo {
+	char* username;
+	char* password;
+	char* ip;
+	char* interface;
+	char* local_cert;
+	char* remote_cert;
+} TConfigDpInfo;*/
+
 typedef struct config {
 	TConfigDbInfo* database;
+	//TConfigDpInfo* datapath;
 	int application_id;
 } TConfig;
 

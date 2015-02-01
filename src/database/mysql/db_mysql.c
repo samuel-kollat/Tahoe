@@ -46,7 +46,7 @@ TMApplication* get_application_mysql(int application_id)
 	mysql_query(con, query_buffer);
 
 	MYSQL_RES* result = mysql_store_result(con);
-	printf("num-rows: %d\n", mysql_num_rows(result));
+	//printf("num-rows: %d\n", mysql_num_rows(result));
 
 	if(mysql_num_rows(result)==0)
 		return NULL;
@@ -56,20 +56,22 @@ TMApplication* get_application_mysql(int application_id)
 		return NULL;
 
 	MYSQL_ROW* row = mysql_fetch_row(result);
-
-	application->id = atoi(row[0]);
+	if(row[0]!=NULL)
+		application->id = atoi(row[0]);
 	string_cpy(&(application->name), row[1]);
 	application->certificate = (TMCertificate*)malloc(sizeof(TMCertificate));
 	if(application->certificate==NULL)
 		return NULL;
-	application->certificate->id = atoi(row[2]);
+	if(row[2]!=NULL)
+		application->certificate->id = atoi(row[2]);
 	string_cpy(&(application->certificate->name), row[7]);
 	string_cpy(&(application->certificate->data), row[8]);
 
 	application->analyzer = (TMAnalyzer*)malloc(sizeof(TMAnalyzer));
 	if(application->analyzer==NULL)
 		return NULL;
-	application->analyzer->id = atoi(row[3]);
+	if(row[3]!=NULL)
+		application->analyzer->id = atoi(row[3]);
 
 	return (TMApplication*) application;
 	
@@ -98,7 +100,7 @@ TMFilter* get_application_filters(int application_id)
 		", application_id);
 	mysql_query(con, query_buffer);
 	MYSQL_RES* result = mysql_store_result(con);
-	printf("num-rows: %d\n", mysql_num_rows(result));
+	//printf("num-rows: %d\n", mysql_num_rows(result));
 
 	if(mysql_num_rows(result)==0)
 		return NULL;	
@@ -118,8 +120,8 @@ TMFilter* get_application_filters(int application_id)
 			return_filter = filter;
 		else
 			last_filter->next = filter;
-
-		filter->id = atoi(row[0]);
+		if(row[0]!=NULL)
+			filter->id = atoi(row[0]);
 		string_cpy(&(filter->name), row[1]);
 		filter->access_list = get_filter_access_lists(filter->id);
 		filter->nbar_protocol = get_filter_nbar_protocols(filter->id);
@@ -141,8 +143,8 @@ TMAccess_list* get_filter_access_lists(int filter_id)
 
 	sprintf(query_buffer, " \
 		SELECT access_list.id, access_list.action, access_list.protocol, \
-		SRC.address as src_address, SRC.wildcard as src_wildcard,\
-		DST.address as dst_address, DST.wildcard as dst_wildcard, \
+		SRC.address as src_address, SRC.mask as src_mask,\
+		DST.address as dst_address, DST.mask as dst_mask, \
 		ports.greater_or_equal, ports.less_or_equal \
 		FROM access_list \
 		LEFT JOIN ip_network SRC \
@@ -156,10 +158,10 @@ TMAccess_list* get_filter_access_lists(int filter_id)
 
 	mysql_query(con, query_buffer);
 
-	printf("%s\n", mysql_error(con));
+	//printf("%s\n", mysql_error(con));
 
 	MYSQL_RES* result = mysql_store_result(con);
-	printf("FACnum-rows: %d\n", mysql_num_rows(result));
+	//printf("FACnum-rows: %d\n", mysql_num_rows(result));
 
 	if(mysql_num_rows(result)==0)
 		return NULL;	
@@ -182,7 +184,8 @@ TMAccess_list* get_filter_access_lists(int filter_id)
 			last_acl->next = acl;
 
 		//filter->id = atoi(row[0]);
-		acl->id = atoi(row[0]);
+		if(row[0]!=NULL)
+			acl->id = atoi(row[0]);
 		if(strcmp(row[1], "permit")==0)
 			acl->action = PERMIT;
 		else
@@ -194,17 +197,21 @@ TMAccess_list* get_filter_access_lists(int filter_id)
 		if(acl->ip_source==NULL || acl->ip_destination==NULL)
 			return NULL;
 		string_cpy(&(acl->ip_source->address), row[3]);
-		string_cpy(&(acl->ip_source->wildcard), row[4]);
+		if(row[4]!=NULL)
+			acl->ip_source->mask = atoi(row[4]);
 
 		string_cpy(&(acl->ip_destination->address), row[5]);
-		string_cpy(&(acl->ip_destination->wildcard), row[6]);
+		if(row[6]!=NULL)
+			acl->ip_destination->mask = atoi(row[6]);
 
 		acl->ports = (TMPorts*)malloc(sizeof(TMPorts));
 		if(acl->ports==NULL)
 			return NULL;
 
-		acl->ports->greater_or_equal = atoi(row[7]);
-		acl->ports->less_or_equal = atoi(row[8]);
+		if(row[7]!=NULL)
+			acl->ports->greater_or_equal = atoi(row[7]);
+		if(row[8]!=NULL)
+			acl->ports->less_or_equal = atoi(row[8]);
 	}
 
 	mysql_free_result(result);
@@ -232,10 +239,10 @@ TMNbar_protocol* get_filter_nbar_protocols(int filter_id)
 
 	mysql_query(con, query_buffer);
 
-	printf("%s\n", mysql_error(con));
+	//printf("%s\n", mysql_error(con));
 
 	MYSQL_RES* result = mysql_store_result(con);
-	printf("NBPnum-rows: %d\n", mysql_num_rows(result));
+	//printf("NBPnum-rows: %d\n", mysql_num_rows(result));
 
 	if(mysql_num_rows(result)==0)
 		return NULL;	
@@ -257,13 +264,68 @@ TMNbar_protocol* get_filter_nbar_protocols(int filter_id)
 		else
 			last_nbar_protocol->next = nbar_protocol;
 
-		nbar_protocol->id = atoi(row[0]);
+		if(row[0]!=NULL)
+			nbar_protocol->id = atoi(row[0]);
 		string_cpy(&(nbar_protocol->protocol_name), row[1]);
 		string_cpy(&(nbar_protocol->protocol_description), row[2]);
 		string_cpy(&(nbar_protocol->protocol_id), row[3]);
 
-		printf("last_nbar_protocol %d nbar_protocol %d next %d\n", last_nbar_protocol, nbar_protocol, nbar_protocol->next);
+		//printf("last_nbar_protocol %d nbar_protocol %d next %d\n", last_nbar_protocol, nbar_protocol, nbar_protocol->next);
 
 	}
 	return (TMNbar_protocol*) return_nbar_protocol;
+}
+
+TMRouter* get_application_routers(int application_id)
+{
+	int retc;
+	TMRouter* return_router = NULL;
+	if(con==NULL)
+		if((retc=init_database())==0)
+			return retc;
+
+	char query_buffer[QUERY_BUFFER_SIZE];
+
+	sprintf(query_buffer, " \
+		SELECT router.id, router.management_ip, router.name, router.username, router.password, router.interfaces \
+		FROM router \
+		WHERE router.application_id='%d'; \
+		", application_id);
+
+	mysql_query(con, query_buffer);
+
+	//printf("%s\n", mysql_error(con));
+
+	MYSQL_RES* result = mysql_store_result(con);
+	//printf("NBPnum-rows: %d\n", mysql_num_rows(result));
+
+	if(mysql_num_rows(result)==0)
+		return NULL;	
+
+	MYSQL_ROW row;
+	TMRouter* router;
+
+	while((row = mysql_fetch_row(result)))
+	{		
+		TMRouter* last_router = router;
+		router = (TMRouter*)malloc(sizeof(TMRouter));		
+		if(router==NULL)
+			return NULL;
+
+		router->next=NULL;
+
+		if(return_router==NULL)
+			return_router = router;
+		else
+			last_router->next = router;
+
+		if(row[0]!=NULL)
+			router->id = atoi(row[0]);
+		string_cpy(&(router->management_ip), row[1]);
+		string_cpy(&(router->name), row[2]);
+		string_cpy(&(router->username), row[3]);
+		string_cpy(&(router->password), row[4]);
+		string_cpy(&(router->interfaces), row[5]);
+	}
+	return (TMRouter*) return_router;
 }

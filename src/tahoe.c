@@ -7,21 +7,7 @@
 #include "tahoe.h"
 
 /* Main application  */
-int main (int argc, char* argv[]) {
-
-  /* configuration file parser */
-
-  /*char* config_filename = "config.dat";
-
-  parse_config(config_filename);
-
-  TMApplication* app = get_application(config->application_id);
-  app->filter = get_application_filters(config->application_id);
-
-  printf("%s\n", app->filter->name);
-
-
-   exit(0);*/
+int main (int argc, char* argv[]) { 
 
    uint64_t pak_count, last_pak_count = 0;
    int timeout = 60;
@@ -29,12 +15,33 @@ int main (int argc, char* argv[]) {
    onep_status_t       rc;
    //onep_status_t destroy_rc;
 
+    /* configuration file parser */
+
+  if(argc!=2)
+  {
+    fprintf(stderr, "Invalid command line parameters. \nUsage: ./tahoe <configuration_file>\n");
+    exit(EXIT_FAILURE);
+  }
+
+  char* config_filename = argv[1];
+  printf("-- Config filename: %s\n", config_filename);
+  parse_config(config_filename);
+
+  // select an application from database and fill it into internal structures
+  printf("%d\n", config->application_id);
+  TMApplication* application = get_application(config->application_id);
+
+  printf("-- Application name: %s\n", application->name);
+
+  //app->filter = get_application_filters(config->application_id);
+
+
    //
    print_db_version();
    //
 
    /* validate and parse the input. */
-   if (parse_options_datapath(argc, argv) == 1) {
+   /*if (parse_options_datapath(argc, argv) == 1) {
       fprintf(stderr, "Usage: %s %s %s %s %s\n",
          argv[0],
          get_usage_required_options(),
@@ -48,7 +55,9 @@ int main (int argc, char* argv[]) {
       || strcmp(get_transport_type(), "2") != 0) {
       prompt_authentication();
       prompt_client_key_passphrase();
-   }
+   }*/
+
+
 
   /*
    *
@@ -62,6 +71,153 @@ int main (int argc, char* argv[]) {
   TApiStatus s;
   s = InitializeFilters();
 
+  // get application filters
+  application->filter = get_application_filters(application->id);
+
+  // get application routers
+  application->router = get_application_routers(application->id);
+
+  TMFilter* application_filter = application->filter;
+  printf("%d\n", application_filter->id);
+  while(application_filter!=NULL)
+  {
+    printf("  -- filter %s: creating\n", application_filter->name);
+    TFilterData* filter;
+
+    s = GetEmptyFilter(&filter);
+
+    application_filter->access_list = get_filter_access_lists(application_filter->id);
+    application_filter->nbar_protocol = get_filter_nbar_protocols(application_filter->id);
+
+
+    TMAccess_list* facl = application_filter->access_list;
+    while(facl!=NULL)
+    {
+      /*typedef struct access_list {
+      int id;
+      acl_actions action;
+      char* protocol;
+      TMIp_network* ip_source;
+      TMIp_network* ip_destination;
+      TMPorts* ports;
+      TMAccess_list* next;
+      } TMAccess_list;*/
+      
+
+      /* SOURCE IP ADDRESS */
+      if(facl->ip_source!=NULL)
+      {
+        s = AddIPv4ToFilter(filter, SRC, facl->ip_source->address, facl->ip_source->mask);
+        printf("    -- added SRC to filter\n");
+      }
+      /* DESTINATION IP ADDRESS */
+      if(facl->ip_destination!=NULL)
+      {
+        s = AddIPv4ToFilter(filter, DST, facl->ip_destination->address, facl->ip_destination->mask);
+        printf("    -- added DSTIP to filter\n");
+      }
+
+      /* PORTS */
+      if(facl->ports!=NULL)
+      {
+        int port_number, port_count=0;
+        for(port_number=facl->ports->greater_or_equal;port_number<=facl->ports->less_or_equal;port_number++)
+        {
+          s = AddPortToFilter(filter, DST, port_number);
+          port_count++;
+        }
+        printf("    -- added %d ports to filter\n", port_count);
+      }
+
+      /* L3 PROTOCOLS from ACL */
+      if(facl->protocol!=NULL)
+      {
+        char* l3_protocol = strtok(facl->protocol, ",");
+        while(l3_protocol != NULL)
+        {          
+          if(strcmp(l3_protocol, "TCP")==0)
+          {
+            s = AddL3ProtocolToFilter(filter, TCP);
+          }
+          else if(strcmp(l3_protocol, "UDP")==0)
+          {
+            s = AddL3ProtocolToFilter(filter, UDP);
+          }
+          else if(strcmp(l3_protocol, "ICMP")==0)
+          {
+            s = AddL3ProtocolToFilter(filter, TCP);
+          }
+          else if(strcmp(l3_protocol, "IGMP")==0)
+          {
+            s = AddL3ProtocolToFilter(filter, TCP);
+          }
+          else if(strcmp(l3_protocol, "ALL")==0)
+          {
+            ;
+          } else {
+            printf("    -- UNKNOWN L3 protocol %s\n", l3_protocol);            
+          }
+          printf("    -- added L3 protocol %s\n", l3_protocol);
+          l3_protocol = strtok(NULL, ",");
+        }
+      }
+
+      facl=facl->next;
+    }
+
+     /* NBAR protocols - L7 */
+    TMNbar_protocol* filter_nbar = application_filter->nbar_protocol;
+    while(filter_nbar!=NULL)
+    {
+      char* l7_protocol = filter_nbar->protocol_id;
+      if(strcmp(l7_protocol, "NONE")==0)
+      {
+        ;
+      }
+      else if(strcmp(l7_protocol, "HTTP")==0)
+      {
+        s = AddL7ProtocolToFilter(filter, HTTP);
+      }
+      else if(strcmp(l7_protocol, "DNS")==0)
+      {
+        s = AddL7ProtocolToFilter(filter, DNS);
+      }
+      else if(strcmp(l7_protocol, "DHCP")==0)
+      {
+        s = AddL7ProtocolToFilter(filter, DHCP);
+      }
+      else if(strcmp(l7_protocol, "CIFS")==0)
+      {
+        s = AddL7ProtocolToFilter(filter, CIFS);
+      }
+      else if(strcmp(l7_protocol, "RTP")==0)
+      {
+        s = AddL7ProtocolToFilter(filter, RTP);
+      }
+      else if(strcmp(l7_protocol, "RTCP")==0)
+      {
+        s = AddL7ProtocolToFilter(filter, RTCP);
+      }
+      else {
+        printf("    -- UNKNOWN L7 protocol %s\n", l7_protocol);            
+      }
+      printf("    -- added L7 protocol %s\n", l7_protocol);
+      filter_nbar = filter_nbar->next;
+    }
+    
+
+    /*
+    TMAccess_list* get_filter_access_lists(int);
+    TMNbar_protocol* get_filter_nbar_protocols(int);
+    */
+
+
+
+    application_filter = application_filter->next;
+  }
+
+  printf("-- Filters: Successfully created\n");
+
   // Create new filter
   TFilterData* filter;
   s = GetEmptyFilter(&filter);
@@ -71,9 +227,9 @@ int main (int argc, char* argv[]) {
 
   // Fill it with data. No need to fill every item
   //s = AddIPv4ToFilter(filter, SRC, "192.168.0.1", 0);
-  s = AddPortToFilter(filter, DST, 53);
-  s = AddL3ProtocolToFilter(filter, UDP);
-  s = AddL7ProtocolToFilter(filter, DNS);
+  //s = AddPortToFilter(filter, DST, 53);
+  //s = AddL3ProtocolToFilter(filter, UDP);
+  //s = AddL7ProtocolToFilter(filter, DNS);
 
   // Create another new filter and fill it
   // ...
@@ -82,31 +238,47 @@ int main (int argc, char* argv[]) {
   TApiCallback callback = proc_pi_callback;
   s = SetCallbackToFilters(callback);
 
-  // Initialize a network element
-  TNetworkElement* element;
-  s = InitializeNetworkElement(
-     "10.100.10.101",
-     "cisco",
-     "cisco",
-     "com.tahoe", // TODO
-     "tls",  // TODO
-     &(element)
-  );
+  // Initialize all network elements - routers
+  TMRouter* router = application->router;
+  while(router!=NULL)
+  {
+    printf("  -- configuring router %s - %s\n", router->name, router->interfaces);
+    TNetworkElement* element;
+    s = InitializeNetworkElement(
+       router->management_ip,
+       router->username,
+       router->password,
+       "com.tahoe", // TODO
+       "tls",  // TODO
+       &(element)
+    );
 
-  // Connect to the network element
-  s = ConnectToNetworkElement(element);
+    // Connect to the network element
+    s = ConnectToNetworkElement(element);
 
-  // Set interface to monitor
-  s = SetInterfaceOnNetworkElement(element, "GigabitEthernet0/2");
-  s = SetInterfaceOnNetworkElement(element, "GigabitEthernet0/3");
+    // Set all interfaces to monitor
+    char* interface = strtok(router->interfaces, ",");
+    while(interface != NULL)
+    {  
+      printf("    -- setting interface %s\n", interface);
+      s = SetInterfaceOnNetworkElement(element, interface);
+      interface = strtok(NULL, ",");      
+    }
+
+    // Deploy to the network element
+    s = DeployFiltersToElement(element);
+
+    // get next router
+    router = router->next;
+  }
 
   // Set another interface
   // ...
 
-  printf("-- Filters: Deploying\n");
+  //printf("-- Filters: Deploying\n");
 
   // Deploy to the network element
-  s = DeployFiltersToElement(element);
+  //s = DeployFiltersToElement(element);
 
   printf ("-- Filters: Done\n");
 
