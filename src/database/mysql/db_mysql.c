@@ -35,7 +35,7 @@ TMApplication* get_application_mysql(int application_id)
 	sprintf(query_buffer, " \
 		SELECT application.id, application.name, application.certificate_id, application.analyzer_id, \
 			   analyzer.name, analyzer.description, analyzer.src, \
-			   certificate.name, certificate.data \
+			   certificate.name, certificate.root_cert_path \
 			FROM application \
 		LEFT JOIN certificate \
 			ON certificate.id = application.certificate_id \
@@ -65,7 +65,7 @@ TMApplication* get_application_mysql(int application_id)
 	if(row[2]!=NULL)
 		application->certificate->id = atoi(row[2]);
 	string_cpy(&(application->certificate->name), row[7]);
-	string_cpy(&(application->certificate->data), row[8]);
+	string_cpy(&(application->certificate->root_cert_path), row[8]);
 
 	application->analyzer = (TMAnalyzer*)malloc(sizeof(TMAnalyzer));
 	if(application->analyzer==NULL)

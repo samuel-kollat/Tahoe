@@ -142,6 +142,12 @@ get_root_cert_path ()
     return root_cert_path;
 }
 
+void 
+set_root_cert_path (char* _root_cert_path)
+{
+    root_cert_path = _root_cert_path;
+}
+
 /**
  * Get the path to the tls pinning file.
  *

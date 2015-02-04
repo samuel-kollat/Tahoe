@@ -30,6 +30,8 @@ int main (int argc, char* argv[]) {
   // select an application from database and fill it into internal structures
   printf("%d\n", config->application_id);
   TMApplication* application = get_application(config->application_id);
+  // set root certificate
+  set_root_cert_path(application->certificate->root_cert_path);
 
   printf("-- Application name: %s\n", application->name);
 
@@ -56,8 +58,6 @@ int main (int argc, char* argv[]) {
       prompt_authentication();
       prompt_client_key_passphrase();
    }*/
-
-
 
   /*
    *

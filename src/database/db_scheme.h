@@ -5,7 +5,7 @@
 typedef struct certificate {
 	int id;
 	char* name;
-	char* data;	
+	char* root_cert_path;	
 } TMCertificate;
 
 struct router;
