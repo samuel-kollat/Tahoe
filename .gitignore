@@ -3,3 +3,4 @@ obj/
 *.pcap
 *.*~
 tutorial.properties
+config.dat
