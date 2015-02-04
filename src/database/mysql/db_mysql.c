@@ -233,7 +233,7 @@ TMNbar_protocol* get_filter_nbar_protocols(int filter_id)
 		SELECT nbar_protocol.id, nbar_protocol.protocol_name, nbar_protocol.protocol_description, \
 		nbar_protocol.protocol_id \
 		FROM nbar_protocol \
-		LEFT JOIN filter_has_nbar_protocol ON filter_has_nbar_protocol.filter_id = '%d' \
+		INNER JOIN filter_has_nbar_protocol ON filter_has_nbar_protocol.filter_id = '%d' \
 		AND filter_has_nbar_protocol.nbar_protocol_id = nbar_protocol.id; \
 		", filter_id);
 
@@ -266,9 +266,12 @@ TMNbar_protocol* get_filter_nbar_protocols(int filter_id)
 
 		if(row[0]!=NULL)
 			nbar_protocol->id = atoi(row[0]);
+
 		string_cpy(&(nbar_protocol->protocol_name), row[1]);
 		string_cpy(&(nbar_protocol->protocol_description), row[2]);
 		string_cpy(&(nbar_protocol->protocol_id), row[3]);
+
+		printf("/// %s\n", row[3]);
 
 		//printf("last_nbar_protocol %d nbar_protocol %d next %d\n", last_nbar_protocol, nbar_protocol, nbar_protocol->next);
 
