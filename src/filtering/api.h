@@ -53,13 +53,13 @@ typedef enum {
 
 // Data for class map entry
 typedef struct {
-    struct sockaddr* src_ip;    // Source IP address
+    char* src_ip;               // Source IP address
     int src_mask;               // Source IP address mask
-    struct sockaddr* dst_ip;    // Destination IP address
+    char* dst_ip;               // Destination IP address
     int dst_mask;               // Destination IP address mask
     int src_port;               // Source port
     int dst_port;               // Destination port
-    onep_acl_protocol_e l3_protocol;
+    onep_acl_protocol_e l3_protocol;    // L3 protocol
     TL7Protocol protocol;       // Protocol
     bool default_filter;        // Default filter settings
 } TFilterData;

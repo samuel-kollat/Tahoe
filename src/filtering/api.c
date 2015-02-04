@@ -69,14 +69,6 @@ TApiStatus AddIPv4ToFilter(TFilterData* filter,
        PrintErrorMessage("AddIPv4ToFilter", "IP address is too long");
        return API_ERROR;
     }
-    struct sockaddr_in* sa = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
-    if(sa == NULL)
-    {
-        PrintErrorMessage("AddIPv4ToFilter", "malloc");
-        return API_ERROR;
-    }
-    sa->sin_family = AF_INET;
-    inet_pton(AF_INET, ip_addr, &(sa->sin_addr));
 
     // Check mask
     if(mask < 0 || mask > 32)
@@ -89,13 +81,13 @@ TApiStatus AddIPv4ToFilter(TFilterData* filter,
     switch(addr_type)
     {
         case SRC:
-           filter->src_ip = (struct sockaddr*)sa;
-           filter->src_mask = mask;
+            filter->src_ip = ip_addr;
+            filter->src_mask = mask;
            break;
         case DST:
-           filter->dst_ip = (struct sockaddr*)sa;
-           filter->dst_mask = mask;
-           break;
+            filter->dst_ip = ip_addr;
+            filter->dst_mask = mask;
+            break;
         default:
             PrintErrorMessage("AddIPv4ToFilter", "Wrong address type");
             return API_ERROR;
