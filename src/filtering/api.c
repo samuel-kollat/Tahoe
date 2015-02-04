@@ -75,6 +75,7 @@ TApiStatus AddIPv4ToFilter(TFilterData* filter,
         PrintErrorMessage("AddIPv4ToFilter", "malloc");
         return API_ERROR;
     }
+    sa->sin_family = AF_INET;
     inet_pton(AF_INET, ip_addr, &(sa->sin_addr));
 
     // Check mask

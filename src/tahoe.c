@@ -7,7 +7,7 @@
 #include "tahoe.h"
 
 /* Main application  */
-int main (int argc, char* argv[]) { 
+int main (int argc, char* argv[]) {
 
    uint64_t pak_count, last_pak_count = 0;
    int timeout = 60;
@@ -102,19 +102,19 @@ int main (int argc, char* argv[]) {
       TMPorts* ports;
       TMAccess_list* next;
       } TMAccess_list;*/
-      
+
 
       /* SOURCE IP ADDRESS */
       if(facl->ip_source!=NULL)
       {
         s = AddIPv4ToFilter(filter, SRC, facl->ip_source->address, facl->ip_source->mask);
-        printf("    -- added SRC to filter\n");
+        printf("    -- added SRC to filter: %s\n", facl->ip_source->address);
       }
       /* DESTINATION IP ADDRESS */
       if(facl->ip_destination!=NULL)
       {
         s = AddIPv4ToFilter(filter, DST, facl->ip_destination->address, facl->ip_destination->mask);
-        printf("    -- added DSTIP to filter\n");
+        printf("    -- added DSTIP to filter: %s\n", facl->ip_destination->address);
       }
 
       /* PORTS */
@@ -134,7 +134,7 @@ int main (int argc, char* argv[]) {
       {
         char* l3_protocol = strtok(facl->protocol, ",");
         while(l3_protocol != NULL)
-        {          
+        {
           if(strcmp(l3_protocol, "TCP")==0)
           {
             s = AddL3ProtocolToFilter(filter, TCP);
@@ -155,7 +155,7 @@ int main (int argc, char* argv[]) {
           {
             ;
           } else {
-            printf("    -- UNKNOWN L3 protocol %s\n", l3_protocol);            
+            printf("    -- UNKNOWN L3 protocol %s\n", l3_protocol);
           }
           printf("    -- added L3 protocol %s\n", l3_protocol);
           l3_protocol = strtok(NULL, ",");
@@ -199,12 +199,12 @@ int main (int argc, char* argv[]) {
         s = AddL7ProtocolToFilter(filter, RTCP);
       }
       else {
-        printf("    -- UNKNOWN L7 protocol %s\n", l7_protocol);            
+        printf("    -- UNKNOWN L7 protocol %s\n", l7_protocol);
       }
       printf("    -- added L7 protocol %s\n", l7_protocol);
       filter_nbar = filter_nbar->next;
     }
-    
+
 
     /*
     TMAccess_list* get_filter_access_lists(int);
@@ -226,7 +226,7 @@ int main (int argc, char* argv[]) {
     s = AddDefaultFilter(filter);
   }
 
-  printf("-- Filters: Successfully created\n"); 
+  printf("-- Filters: Successfully created\n");
 
   // Set callback for packet processing
   TApiCallback callback = proc_pi_callback;
@@ -242,7 +242,7 @@ int main (int argc, char* argv[]) {
        router->management_ip,
        router->username,
        router->password,
-       "com.tahoe", // TODO
+       "com.tahoe.db", // TODO
        "tls",  // TODO
        &(element)
     );
@@ -253,10 +253,10 @@ int main (int argc, char* argv[]) {
     // Set all interfaces to monitor
     char* interface = strtok(router->interfaces, ",");
     while(interface != NULL)
-    {  
+    {
       printf("    -- setting interface %s\n", interface);
       s = SetInterfaceOnNetworkElement(element, interface);
-      interface = strtok(NULL, ",");      
+      interface = strtok(NULL, ",");
     }
 
     // Deploy to the network element

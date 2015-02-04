@@ -80,7 +80,7 @@ void ace_add_ip(onep_ace_t *ace,                // ACE
     onep_status_t rc = ONEP_OK;
 
     // 1. Set src prefix
-    rc = onep_acl_set_l3_ace_src_prefix(ace, NULL, 0);
+    rc = onep_acl_set_l3_ace_src_prefix(ace, src_prefix, 0);
     if(rc != ONEP_OK) {
         fprintf(stderr, "\nError in onep_acl_set_l3_ace_src_prefix : %d, %s\n",
             rc, onep_strerror(rc));
@@ -88,7 +88,7 @@ void ace_add_ip(onep_ace_t *ace,                // ACE
     }
 
     // 2. Set dest prefix
-    rc = onep_acl_set_l3_ace_dst_prefix(ace, NULL, 0);
+    rc = onep_acl_set_l3_ace_dst_prefix(ace, dst_prefix, 0);
     if(rc != ONEP_OK) {
         fprintf(stderr, "\nError in onep_acl_set_l3_ace_dst_prefix: %d, %s\n",
             rc, onep_strerror(rc));
