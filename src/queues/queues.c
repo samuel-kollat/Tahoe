@@ -142,11 +142,18 @@ TQueueItem* GetNextItemInQueue(TQueue* queue)
 {
     TQueueItem* item = queue->head;
 
-    // Move head
-    queue->head = queue->head->next;
-
-    // Remove from queue
-    item->next = NULL;
+    // No more items
+    if(item->backstop == true)
+    {
+        item = NULL;
+    }
+    else
+    {
+        // Move head
+        queue->head = queue->head->next;
+        // Remove from queue
+        item->next = NULL;
+    }
 
     return item;
 }
