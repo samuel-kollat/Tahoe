@@ -28,7 +28,6 @@ int main (int argc, char* argv[]) {
   parse_config(config_filename);
 
   // select an application from database and fill it into internal structures
-  printf("%d\n", config->application_id);
   TMApplication* application = get_application(config->application_id);
   // set root certificate
   set_root_cert_path(application->certificate->root_cert_path);
@@ -40,24 +39,7 @@ int main (int argc, char* argv[]) {
 
    //
    print_db_version();
-   //
 
-   /* validate and parse the input. */
-   /*if (parse_options_datapath(argc, argv) == 1) {
-      fprintf(stderr, "Usage: %s %s %s %s %s\n",
-         argv[0],
-         get_usage_required_options(),
-         get_usage_required_options_datapath(),
-         get_usage_optional_options_datapath(),
-         get_usage_optional_options());
-      return EXIT_FAILURE;
-   }
-
-   if (strcasecmp(get_transport_type(), "tipc") != 0
-      || strcmp(get_transport_type(), "2") != 0) {
-      prompt_authentication();
-      prompt_client_key_passphrase();
-   }*/
 
   /*
    *
@@ -78,7 +60,7 @@ int main (int argc, char* argv[]) {
   application->router = get_application_routers(application->id);
 
   TMFilter* application_filter = application->filter;
-  printf("%d\n", application_filter->id);
+
   while(application_filter!=NULL)
   {
     printf("  -- filter %s: creating\n", application_filter->name);
@@ -93,16 +75,6 @@ int main (int argc, char* argv[]) {
     TMAccess_list* facl = application_filter->access_list;
     while(facl!=NULL)
     {
-      /*typedef struct access_list {
-      int id;
-      acl_actions action;
-      char* protocol;
-      TMIp_network* ip_source;
-      TMIp_network* ip_destination;
-      TMPorts* ports;
-      TMAccess_list* next;
-      } TMAccess_list;*/
-
 
       /* SOURCE IP ADDRESS */
       if(facl->ip_source!=NULL)
@@ -117,16 +89,24 @@ int main (int argc, char* argv[]) {
         printf("    -- added DSTIP to filter: %s\n", facl->ip_destination->address);
       }
 
-      /* PORTS */
-      if(facl->ports!=NULL)
+      /* SOURCE PORTS */
+      if(facl->pn_source!=NULL)
       {
-        int port_number, port_count=0;
-        for(port_number=facl->ports->greater_or_equal;port_number<=facl->ports->less_or_equal;port_number++)
+        if(facl->pn_source->greater_or_equal==facl->pn_source->less_or_equal)
         {
-          s = AddPortToFilter(filter, DST, port_number);
-          port_count++;
+          s = AddPortToFilter(filter, SRC, facl->pn_source->greater_or_equal);
         }
-        printf("    -- added %d ports to filter\n", port_count);
+        printf("    -- added %d as SRC port to filter\n", facl->pn_source->greater_or_equal);
+      }
+
+      /* DESTINATION PORTS */
+      if(facl->pn_destination!=NULL)
+      {
+        if(facl->pn_destination->greater_or_equal==facl->pn_destination->less_or_equal)
+        {
+          s = AddPortToFilter(filter, DST, facl->pn_destination->greater_or_equal);
+        }
+        printf("    -- added %d as DST port to filter\n", facl->pn_destination->greater_or_equal);
       }
 
       /* L3 PROTOCOLS from ACL */

@@ -45,6 +45,9 @@
 // Backend API
 #include "filtering/api.h"
 
+// TODO: unused
+#include "filtering/configuration.h"
+
 
 #define FAIL false
 #define SUCCESS true

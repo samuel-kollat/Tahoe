@@ -145,14 +145,17 @@ TMAccess_list* get_filter_access_lists(int filter_id)
 		SELECT access_list.id, access_list.action, access_list.protocol, \
 		SRC.address as src_address, SRC.mask as src_mask,\
 		DST.address as dst_address, DST.mask as dst_mask, \
-		ports.greater_or_equal, ports.less_or_equal \
+		PNS.greater_or_equal, PNS.less_or_equal, \
+		PND.greater_or_equal, PND.less_or_equal \
 		FROM access_list \
 		LEFT JOIN ip_network SRC \
 			ON access_list.ip_source = SRC.id \
 		LEFT JOIN ip_network DST \
 			ON access_list.ip_destination = DST.id \
-		LEFT JOIN ports \
-			ON access_list.ports_id = ports.id \
+		LEFT JOIN ports PNS \
+			ON access_list.pn_source = PNS.id \
+		LEFT JOIN ports PND \
+			ON access_list.pn_destination = PND.id \
 		WHERE access_list.filter_id='%d'; \
 		", filter_id);
 
@@ -202,16 +205,35 @@ TMAccess_list* get_filter_access_lists(int filter_id)
 
 		string_cpy(&(acl->ip_destination->address), row[5]);
 		if(row[6]!=NULL)
-			acl->ip_destination->mask = atoi(row[6]);
+			acl->ip_destination->mask = atoi(row[6]);		
 
-		acl->ports = (TMPorts*)malloc(sizeof(TMPorts));
-		if(acl->ports==NULL)
-			return NULL;
+		// Source ports
+		if(row[7]!=NULL && row[8]!=NULL)
+		{
+			acl->pn_source = (TMPorts*)malloc(sizeof(TMPorts));
+			if(acl->pn_source==NULL)
+				return NULL;
+			
+			acl->pn_source->greater_or_equal = atoi(row[7]);
+			acl->pn_source->less_or_equal = atoi(row[8]);
+			//printf(">%d %d\n", acl->pn_source->greater_or_equal, acl->pn_source->less_or_equal);
+		} else {
+			acl->pn_source = NULL;
+		}
 
-		if(row[7]!=NULL)
-			acl->ports->greater_or_equal = atoi(row[7]);
-		if(row[8]!=NULL)
-			acl->ports->less_or_equal = atoi(row[8]);
+		// Destination ports
+		if(row[9]!=NULL && row[10]!=NULL)
+		{
+			acl->pn_destination = (TMPorts*)malloc(sizeof(TMPorts));
+			if(acl->pn_destination==NULL)
+				return NULL;
+
+			acl->pn_destination->greater_or_equal = atoi(row[9]);
+			acl->pn_destination->less_or_equal = atoi(row[10]);
+			//printf(">%d %d\n", acl->pn_destination->greater_or_equal, acl->pn_destination->less_or_equal);
+		} else {
+			acl->pn_destination = NULL;
+		}
 	}
 
 	mysql_free_result(result);
@@ -270,8 +292,6 @@ TMNbar_protocol* get_filter_nbar_protocols(int filter_id)
 		string_cpy(&(nbar_protocol->protocol_name), row[1]);
 		string_cpy(&(nbar_protocol->protocol_description), row[2]);
 		string_cpy(&(nbar_protocol->protocol_id), row[3]);
-
-		printf("/// %s\n", row[3]);
 
 		//printf("last_nbar_protocol %d nbar_protocol %d next %d\n", last_nbar_protocol, nbar_protocol, nbar_protocol->next);
 

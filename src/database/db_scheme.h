@@ -44,7 +44,8 @@ typedef struct access_list {
 	char* protocol;
 	TMIp_network* ip_source;
 	TMIp_network* ip_destination;
-	TMPorts* ports;
+	TMPorts* pn_source;
+	TMPorts* pn_destination;
 	TMAccess_list* next;
 } TMAccess_list;
 

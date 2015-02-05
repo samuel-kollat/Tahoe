@@ -19,7 +19,8 @@ OBJSNETAPP += \
 	obj/router.o \
 	obj/print_info.o \
 	obj/api.o \
-	obj/config.o
+	obj/config.o \
+	obj/configuration.o
 
 LD_LIBS += -lonep${ONEP_LBITS}_datapath
 

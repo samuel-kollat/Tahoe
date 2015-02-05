@@ -103,7 +103,7 @@ TConfig* parse_config(char* config_filename)
 			if(strcmp(left,"id")==0)
 			{
 				config->application_id = atoi(right);
-			}printf("a\n");
+			}
 		}
 		/*
 		// [DATAPATH]

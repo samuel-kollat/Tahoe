@@ -1,3 +1,6 @@
+#ifndef __DB_MYSQL_H__
+#define __DB_MYSQL_H__
+
 #include <my_global.h>
 #include <mysql.h>
 #include "../db_scheme.h"
@@ -13,3 +16,5 @@ TMAccess_list* get_filter_access_lists(int);
 TMNbar_protocol* get_filter_nbar_protocols(int);
 TMRouter* get_application_routers(int);
 int init_database();	
+
+#endif
