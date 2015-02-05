@@ -20,7 +20,8 @@ OBJSNETAPP += \
 	obj/print_info.o \
 	obj/api.o \
 	obj/config.o \
-	obj/connector.o
+	obj/connector.o \
+	obj/queues.o
 
 LD_LIBS += -lonep${ONEP_LBITS}_datapath
 
@@ -65,6 +66,14 @@ obj/db_wrapper.o: database/db_wrapper.c
 	@echo 'Invoking: GCC C Compiler'
 	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
 		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<" `mysql_config --cflags --libs`
+	@echo 'Finished building: $<'
+	@echo ' '
+
+obj/%.o: queues/%.c
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C Compiler'
+	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
+		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
