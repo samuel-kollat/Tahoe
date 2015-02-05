@@ -34,12 +34,7 @@ int main (int argc, char* argv[]) {
 
   printf("-- Application name: %s\n", application->name);
 
-  //app->filter = get_application_filters(config->application_id);
-
-
-   //
-   print_db_version();
-
+  print_db_version();
 
   /*
    *
@@ -185,13 +180,6 @@ int main (int argc, char* argv[]) {
       filter_nbar = filter_nbar->next;
     }
 
-
-    /*
-    TMAccess_list* get_filter_access_lists(int);
-    TMNbar_protocol* get_filter_nbar_protocols(int);
-    */
-
-
     application_filter = application_filter->next;
   }
 
@@ -218,11 +206,13 @@ int main (int argc, char* argv[]) {
   {
     printf("  -- configuring router %s - %s\n", router->name, router->interfaces);
     TNetworkElement* element;
+    char app_name[32];
+    sprintf(app_name, "com.tahoe.application.%d", application->id);
     s = InitializeNetworkElement(
        router->management_ip,
        router->username,
        router->password,
-       "com.tahoe.db", // TODO
+       app_name, // TODO
        "tls",  // TODO
        &(element)
     );
