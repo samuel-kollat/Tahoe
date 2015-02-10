@@ -22,6 +22,7 @@ OBJSNETAPP += \
 	obj/config.o \
 	obj/configuration.o \
 	obj/connector.o \
+	obj/callback.o \
 	obj/queues.o
 
 LD_LIBS += -lonep${ONEP_LBITS}_datapath

@@ -151,8 +151,16 @@ void proc_pi_get_flow_state(struct onep_dpss_paktype_ *pakp,
     return;
 }
 
-//
 void proc_pi_callback(  onep_dpss_traffic_reg_t *reg,
+                        struct onep_dpss_paktype_ *pak, 
+                        void *client_context, 
+                        bool *return_packet ) 
+{
+    //InsertPacketToQueue(queue, (TPacket)pak);
+}
+
+// original
+void proc_pi_callback2(  onep_dpss_traffic_reg_t *reg,
                         struct onep_dpss_paktype_ *pak, 
                         void *client_context, 
                         bool *return_packet ) 
@@ -196,6 +204,9 @@ void proc_pi_callback(  onep_dpss_traffic_reg_t *reg,
         fprintf(stderr, "Error getting flow ID. code[%d], text[%s]\n",
               rc, onep_strerror(rc));
     }
+
+
+
     printf(
         "\n"
         "\033[22;4;30m"

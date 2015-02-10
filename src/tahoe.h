@@ -40,14 +40,20 @@
 // Utils
 #include "utils/router.h"
 // Processing
-#include "processing/print_info/print_info.h"
 
 // Backend API
 #include "filtering/api.h"
+#include "filtering/callback.h"
 
 // TODO: unused
 #include "filtering/configuration.h"
 
+#include "processing/connector.h"
+ 
+#include <pthread.h>
+
+// Global variables
+#include "globals.h"
 
 #define FAIL false
 #define SUCCESS true

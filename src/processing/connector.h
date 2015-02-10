@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <pthread.h>
+
+// Global variables
+#include "../globals.h"
+
 #include "../queues/queues.h"
 
 #include "onep_dpss_callback_framework.h"
@@ -25,5 +30,9 @@ TMeStatus RegisterQueueCallback(TQueueCallback callback);
 
 // Print error
 void PrintMeErrorMessage(char* dst, char* msg);
+
+void* processing(void *);
+
+extern TQueueCallback Proc_callback;
 
 #endif

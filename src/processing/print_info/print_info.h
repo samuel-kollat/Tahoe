@@ -20,6 +20,8 @@
 #include "onep_dpss_flow.h"
 #include "onep_dpss_callback_framework.h"
 
+#include "../../queues/queues.h"
+
 // Simple packet callback that will just display some information per
 // packet. Can be used for diverted or copied packets and doesn't try to
 // take any action on the packet.
