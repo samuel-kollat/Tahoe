@@ -251,16 +251,16 @@ int main (int argc, char* argv[]) {
    */
 
   TMeStatus me_s;
-  
+
   me_s = SetTypeOfQueue(ONLINE, 100, &Packet_queue);
-  //me_s = RegisterQueueCallback(???);
+  me_s = RegisterQueueCallback(SelectModule("print"));
 
   pthread_t proc_thread;
   while(pthread_create(&proc_thread, NULL, processing, (void*)Packet_queue)!=0)
   {
     if (errno == EAGAIN) continue;
     fprintf(stderr, "Cannot create new thread. Exiting...\n");
-    exit(EXIT_FAILURE);    
+    exit(EXIT_FAILURE);
   }
 
    last_pak_count = 0;

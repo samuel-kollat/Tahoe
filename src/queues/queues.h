@@ -96,6 +96,10 @@ TQueueItem* InsertPacketToOfflineQueue(
     TPacket packet
 );
 
+bool IsChunkFull(
+    TQueue* queue
+);
+
 bool IsChunkReady(
     TQueue* queue
 );

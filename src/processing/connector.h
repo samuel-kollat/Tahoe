@@ -20,7 +20,7 @@ typedef enum {
 } TMeStatus;
 
 // Type of callback to process queue
-typedef TMeStatus (*TQueueCallback)(TQueue* queue);
+typedef void (*TQueueCallback)(TQueueItem* start, TQueueItem* stop);
 
 // Set desired queue type
 TMeStatus SetTypeOfQueue(TQueueType type, TQueueParam param, TQueue** queue);

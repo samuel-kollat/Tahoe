@@ -37,16 +37,24 @@ void* processing(void *arg)
 
   while(1)
   {
+    TQueueItem* start = NULL;
+    TQueueItem* stop = NULL;
+
     pthread_mutex_lock(&proc_mutex);
+
     while (!IsChunkReady(queue)) {
       /* ne, zahaj čekání a odemkni mutex */
       pthread_cond_wait(&proc_cond, &proc_mutex);
       /* čekání přerušeno, mutex je zamčený */
-    } 
-    pthread_mutex_unlock(&proc_mutex); /* mon. end */
-  
+    }
+
+    start = queue->head;
+    stop = queue->backstop;
+
+    pthread_mutex_unlock(&proc_mutex);
+
     printf("callback(...)\n");
-    Proc_callback(Packet_queue);
+    Proc_callback(start, stop);
   }
 
 }

@@ -17,12 +17,13 @@ OBJSNETAPP += \
 	obj/class_map.o \
 	obj/acl.o \
 	obj/router.o \
-	obj/print_info.o \
+	obj/print.o \
 	obj/api.o \
 	obj/config.o \
 	obj/configuration.o \
 	obj/connector.o \
 	obj/callback.o \
+	obj/modules.o \
 	obj/queues.o
 
 LD_LIBS += -lonep${ONEP_LBITS}_datapath
@@ -103,7 +104,15 @@ obj/%.o: processing/%.c
 	@echo 'Finished building: $<'
 	@echo ' '
 
-obj/%.o: processing/print_info/%.c
+obj/%.o: processing/modules/%.c
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C Compiler'
+	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
+		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+obj/%.o: processing/modules/print/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
 	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \

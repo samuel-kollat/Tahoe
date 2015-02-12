@@ -166,6 +166,11 @@ void DisposeQueueItem(TQueueItem* item)
     return;
 }
 
+bool IsChunkFull(TQueue* queue)
+{
+    return (queue->backstop->param >= (int)queue->param);
+}
+
 bool IsChunkReady(TQueue* queue)
 {
     return (queue->head->backstop != true);

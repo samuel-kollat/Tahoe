@@ -49,11 +49,14 @@
 #include "filtering/configuration.h"
 
 #include "processing/connector.h"
- 
+
 #include <pthread.h>
 
 // Global variables
 #include "globals.h"
+
+//Modules
+#include "processing/modules/modules.h"
 
 #define FAIL false
 #define SUCCESS true
