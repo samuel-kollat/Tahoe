@@ -4,14 +4,12 @@ void Print(TQueueItem* start, TQueueItem* stop)
 {
     TQueueItem* item = start;
 
-    while(item != stop)
+    while(item != NULL)
     {
         TPacket* packet = item->packet;
         print_packet(packet);
 
-        TQueueItem* processed = item;
-        item = item->next;
-        DisposeQueueItem(processed);
+        item = GetNextItem(item, stop);
     }
 }
 

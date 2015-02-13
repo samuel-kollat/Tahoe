@@ -36,9 +36,8 @@ TQueue* GetOnlineQueue(TQueueParam param)
     }
 
     queue->type = ONLINE;
-    queue->head = CreateBackstop();
-    queue->tail = queue->head;
-    queue->backstop = queue->head;
+    queue->backstop = CreateBackstop();
+    queue->tail = queue->backstop;
     queue->pcap = NULL;
     queue->param = param;
 
@@ -56,6 +55,7 @@ TQueueItem* CreateBackstop()
 
     item->packet = NULL;
     item->next = NULL;
+    item->prev = NULL;
     item->backstop = true;
     item->param = 0;
 
@@ -99,6 +99,7 @@ TQueueItem* InsertPacketToOnlineQueue(TQueue* queue,
 
     new_item->packet = packet;
     new_item->next = NULL;
+    new_item->prev = queue->tail;
     new_item->backstop = false;
     new_item->param = -1;
 
@@ -129,30 +130,53 @@ bool CompleteChunkInQueue(TQueue* queue)
     // if complete, move backstop
     if(complete == true)
     {
-        queue->head = queue->backstop->next;
+        // Prev pointer of the first item in queue is NULL
+        queue->backstop->next->prev = NULL;
+
         queue->tail->next = queue->backstop;
         queue->backstop->next = NULL;
+        queue->backstop->prev = queue->tail;
         queue->backstop->param = 0;
+        queue->tail = queue->backstop;
     }
 
     return complete;
 }
 
-TQueueItem* GetNextItemInQueue(TQueue* queue)
+void GetChunkRange(TQueue* queue, TQueueItem** start,TQueueItem** stop)
 {
-    TQueueItem* item = queue->head;
+    *stop = queue->backstop->prev;
+
+    TQueueItem* item = *stop;
+    while(item != NULL)
+    {
+        *start = item;
+        item = item->prev;
+    }
+
+    // Close chunk
+    queue->backstop->prev = NULL;
+
+    return;
+}
+
+TQueueItem* GetNextItem(TQueueItem* current, TQueueItem* stop)
+{
+    TQueueItem* item = NULL;
 
     // No more items
-    if(item->backstop == true)
+    if(current == stop)
     {
+        // Nothing to return
         item = NULL;
     }
     else
     {
-        // Move head
-        queue->head = queue->head->next;
-        // Remove from queue
-        item->next = NULL;
+        // Next item
+        item = current->next;
+        // Dispose current
+        item->prev = NULL;
+        DisposeQueueItem(current);
     }
 
     return item;
@@ -173,6 +197,6 @@ bool IsChunkFull(TQueue* queue)
 
 bool IsChunkReady(TQueue* queue)
 {
-    return (queue->head->backstop != true);
+    return (queue->backstop->prev != NULL);
 }
 

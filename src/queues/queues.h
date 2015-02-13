@@ -24,6 +24,7 @@ typedef FILE* TPcap;
 typedef struct Packet {
     TPacket packet;
     struct Packet* next;
+    struct Packet* prev;
     bool backstop;          // True if Backstop
     int param;              // Additional info about Backstop
 } TQueueItem;
@@ -31,7 +32,6 @@ typedef struct Packet {
 // Queue
 typedef struct {
     TQueueType type;    // Type of the queue
-    TQueueItem* head;   // Pointer to the first element
     TQueueItem* tail;   // Pointer to the last element
     TQueueItem* backstop;   // Pointer to the backstop
     TPcap pcap;         // Pointer to a pcap file
@@ -69,6 +69,13 @@ TQueueItem* GetNextItemInQueue(
 // Public
 void DisposeQueueItem(
     TQueueItem* item
+);
+
+// Public
+void GetChunkRange(
+    TQueue* queue,
+    TQueueItem** start,
+    TQueueItem** stop
 );
 
 //

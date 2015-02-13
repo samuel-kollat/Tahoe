@@ -48,8 +48,7 @@ void* processing(void *arg)
       /* čekání přerušeno, mutex je zamčený */
     }
 
-    start = queue->head;
-    stop = queue->backstop;
+    GetChunkRange(queue, &start, &stop);
 
     pthread_mutex_unlock(&proc_mutex);
 
