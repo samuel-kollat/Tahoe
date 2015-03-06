@@ -6,6 +6,9 @@ void packet_enqueue_callback( onep_dpss_traffic_reg_t *reg,
                             bool *return_packet )
 {
     InsertPacketToQueue(Packet_queue, (TPacket)pak);
+
+    printf("packet_enqueue_callback\n");
+
     // Chunk is ready
     if(IsChunkFull(Packet_queue))
     {

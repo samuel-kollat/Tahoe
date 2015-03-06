@@ -252,7 +252,7 @@ int main (int argc, char* argv[]) {
 
   TMeStatus me_s;
 
-  me_s = SetTypeOfQueue(ONLINE, 100, &Packet_queue);
+  me_s = SetTypeOfQueue(ONLINE, 10, &Packet_queue);
   me_s = RegisterQueueCallback(SelectModule("print"));
 
   pthread_t proc_thread;

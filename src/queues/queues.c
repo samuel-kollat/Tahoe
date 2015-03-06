@@ -174,17 +174,17 @@ TQueueItem* GetNextItem(TQueueItem* current, TQueueItem* stop)
     {
         // Next item
         item = current->next;
+
         // Dispose current
         item->prev = NULL;
         DisposeQueueItem(current);
     }
-
     return item;
 }
 
 void DisposeQueueItem(TQueueItem* item)
 {
-    free(item->packet); // TODO
+    //free(item->packet); // TODO
     free(item);
 
     return;

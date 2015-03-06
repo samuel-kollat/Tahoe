@@ -62,8 +62,9 @@ bool CompleteChunkInQueue(
 );
 
 // Public
-TQueueItem* GetNextItemInQueue(
-    TQueue* queue
+TQueueItem* GetNextItem(
+    TQueueItem* current,
+    TQueueItem* stop
 );
 
 // Public
