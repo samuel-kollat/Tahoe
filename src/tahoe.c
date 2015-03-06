@@ -6,6 +6,12 @@
 
 #include "tahoe.h"
 
+// Define global variables
+pthread_mutex_t proc_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t proc_cond = PTHREAD_COND_INITIALIZER;
+TQueue* Packet_queue = NULL;
+
+
 /* Main application  */
 int main (int argc, char* argv[]) {
 
@@ -197,7 +203,7 @@ int main (int argc, char* argv[]) {
   printf("-- Filters: Successfully created\n");
 
   // Set callback for packet processing
-  TApiCallback callback = proc_pi_callback;
+  TApiCallback callback = packet_enqueue_callback;
   s = SetCallbackToFilters(callback);
 
   // Initialize all network elements - routers
@@ -244,11 +250,24 @@ int main (int argc, char* argv[]) {
    *
    */
 
+  TMeStatus me_s;
+
+  me_s = SetTypeOfQueue(ONLINE, 10, &Packet_queue);
+  me_s = RegisterQueueCallback(SelectModule("print"));
+
+  pthread_t proc_thread;
+  while(pthread_create(&proc_thread, NULL, processing, (void*)Packet_queue)!=0)
+  {
+    if (errno == EAGAIN) continue;
+    fprintf(stderr, "Cannot create new thread. Exiting...\n");
+    exit(EXIT_FAILURE);
+  }
+
    last_pak_count = 0;
    /* wait to query the packet loop for the number
     * of packets received and processed. */
    printf ("\n\nWaiting for packets...\n");
-   while (loop_count < 3) {
+   while (1) {
       sleep(timeout);
       (void) onep_dpss_packet_callback_rx_count(&pak_count);
       fprintf(stderr, "Current Packet Count: %"PRIu64"\n", pak_count);

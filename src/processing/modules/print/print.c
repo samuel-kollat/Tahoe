@@ -1,7 +1,76 @@
-#include "print_info.h"
+#include "print.h"
+
+void Print(TQueueItem* start, TQueueItem* stop)
+{
+    TQueueItem* item = start;
+
+    while(item != NULL)
+    {
+        TPacket* packet = item->packet;
+        print_packet(packet);
+
+        item = GetNextItem(item, stop);
+    }
+}
+
+void print_packet(TPacket* packet)
+{
+    struct onep_dpss_paktype_* pak = (struct onep_dpss_paktype_*)packet;
+
+    onep_status_t        rc;
+    onep_dpss_fid_t      fid;
+    char                 ipv = 0;
+    uint16_t             src_port = 0;
+    uint16_t             dest_port = 0;
+    char                 *src_ip = NULL;
+    char                 *dest_ip = NULL;
+    char                 l4_protocol[5];
+    char                 l4_state[30];
+
+    strcpy(l4_protocol,"ERR");
+    strcpy(l4_state,"ERR");
+
+    rc = onep_dpss_pkt_get_flow(pak, &fid);
+    if( rc == ONEP_OK ) {
+        rc = proc_pi_get_ip_version(pak, &ipv);
+        if( rc != ONEP_OK ) {
+            fprintf(stderr, "Error in get ip version: code[%d], text[%s]\n",
+                    rc, onep_strerror(rc));
+        }
+        rc = proc_pi_get_ip_port_info(pak, &src_ip,
+                                            &dest_ip,
+                                            &src_port,
+                                            &dest_port,
+                                            l4_protocol,
+                                            ipv);
+        if( rc != ONEP_OK ) {
+          fprintf(stderr, "Error in get ip port info: code[%d], text[%s]\n",
+                  rc, onep_strerror(rc));
+        }
+        proc_pi_get_flow_state(pak, fid, l4_state);
+
+    } else {
+        fprintf(stderr, "Error getting flow ID. code[%d], text[%s]\n",
+              rc, onep_strerror(rc));
+    }
 
 
-//
+
+    printf(
+        "\n"
+        "\033[22;4;30m"
+        "| FID | IPv | Source                  |"
+        " Destination             | Prot | Pkt# | State                     |\n"
+        "\033[0m");
+    printf(
+      "| %-3"PRIu64" |  %c  | %-15s : %-5d | %-15s : %-5d | %-4s | %-25s |\n\n",
+      fid, ipv, src_ip, src_port, dest_ip, dest_port,
+      l4_protocol, l4_state);
+    free(src_ip);
+    free(dest_ip);
+    return;
+}
+
 onep_status_t proc_pi_get_ip_version(   struct onep_dpss_paktype_ *pakp,
                                         char *ip_version )
 {
@@ -31,14 +100,12 @@ onep_status_t proc_pi_get_ip_version(   struct onep_dpss_paktype_ *pakp,
     return (ONEP_OK);
 }
 
-
-//
-onep_status_t proc_pi_get_ip_port_info( struct onep_dpss_paktype_ *pakp, 
-                                        char **src_ip, 
+onep_status_t proc_pi_get_ip_port_info( struct onep_dpss_paktype_ *pakp,
+                                        char **src_ip,
                                         char **dest_ip,
-                                        uint16_t *src_port, uint16_t *dest_port, 
-                                        char *prot, 
-                                        char ip_version ) 
+                                        uint16_t *src_port, uint16_t *dest_port,
+                                        char *prot,
+                                        char ip_version )
 {
 
     onep_status_t   rc;
@@ -115,10 +182,8 @@ onep_status_t proc_pi_get_ip_port_info( struct onep_dpss_paktype_ *pakp,
     return (ONEP_OK);
 }
 
-
-//
 void proc_pi_get_flow_state(struct onep_dpss_paktype_ *pakp,
-                            onep_dpss_flow_ptr_t fid, 
+                            onep_dpss_flow_ptr_t fid,
                             char *l4_state_char )
 {
 
@@ -148,66 +213,5 @@ void proc_pi_get_flow_state(struct onep_dpss_paktype_ *pakp,
         fprintf(stderr, "Error getting L4 state of flow. code[%d], text[%s]\n",
               rc, onep_strerror(rc));
     }
-    return;
-}
-
-//
-void proc_pi_callback(  onep_dpss_traffic_reg_t *reg,
-                        struct onep_dpss_paktype_ *pak, 
-                        void *client_context, 
-                        bool *return_packet ) 
-{
-    
-    static int count = 1;   /* packet counter*/
-
-    onep_status_t        rc;
-    onep_dpss_fid_t      fid;
-    char                 ipv = 0;
-    uint16_t             src_port = 0;
-    uint16_t             dest_port = 0;
-    char                 *src_ip = NULL;
-    char                 *dest_ip = NULL;
-    char                 l4_protocol[5];
-    char                 l4_state[30];
-
-    strcpy(l4_protocol,"ERR");
-    strcpy(l4_state,"ERR");
-
-    rc = onep_dpss_pkt_get_flow(pak, &fid);
-    if( rc == ONEP_OK ) {
-        rc = proc_pi_get_ip_version(pak, &ipv);
-        if( rc != ONEP_OK ) {
-            fprintf(stderr, "Error in get ip version: code[%d], text[%s]\n",
-                    rc, onep_strerror(rc));
-        }
-        rc = proc_pi_get_ip_port_info(pak, &src_ip,
-                                            &dest_ip,
-                                            &src_port,
-                                            &dest_port,
-                                            l4_protocol,
-                                            ipv);
-        if( rc != ONEP_OK ) {
-          fprintf(stderr, "Error in get ip port info: code[%d], text[%s]\n",
-                  rc, onep_strerror(rc));
-        }
-        proc_pi_get_flow_state(pak, fid, l4_state);
-
-    } else {
-        fprintf(stderr, "Error getting flow ID. code[%d], text[%s]\n",
-              rc, onep_strerror(rc));
-    }
-    printf(
-        "\n"
-        "\033[22;4;30m"
-        "| FID | IPv | Source                  |"
-        " Destination             | Prot | Pkt# | State                     |\n"
-        "\033[0m");
-    printf(
-      "| %-3"PRIu64" |  %c  | %-15s : %-5d | %-15s : %-5d | %-4s | %3d  | %-25s |\n\n",
-      fid, ipv, src_ip, src_port, dest_ip, dest_port,
-      l4_protocol,count, l4_state);
-    count++;
-    free(src_ip);
-    free(dest_ip);
     return;
 }
