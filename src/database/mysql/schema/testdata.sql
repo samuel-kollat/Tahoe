@@ -17,6 +17,11 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
+-- Disable foreign key validation
+--
+SET FOREIGN_KEY_CHECKS = 0;
+
+--
 -- Database: `tahoe`
 --
 
@@ -109,3 +114,9 @@ INSERT INTO `router` (`id`, `management_ip`, `name`, `application_id`, `username
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+--
+-- Reenable foreign key validation
+--
+SET FOREIGN_KEY_CHECKS = 1;
+
