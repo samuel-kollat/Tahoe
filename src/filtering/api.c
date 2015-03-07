@@ -176,6 +176,7 @@ TApiStatus DeployFiltersToElement(TNetworkElement* element)
 
     // Create filtering rules
     TApiStatus s = GenerateFilters(element);
+
     if(s != API_OK)
     {
         PrintErrorMessage("DeployFiltersToElement", "generate filters");

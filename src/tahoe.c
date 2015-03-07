@@ -106,8 +106,8 @@ int main (int argc, char* argv[]) {
         if(facl->pn_destination->greater_or_equal==facl->pn_destination->less_or_equal)
         {
           s = AddPortToFilter(filter, DST, facl->pn_destination->greater_or_equal);
+          printf("    -- added %d as DST port to filter\n", facl->pn_destination->greater_or_equal);
         }
-        printf("    -- added %d as DST port to filter\n", facl->pn_destination->greater_or_equal);
       }
 
       /* L3 PROTOCOLS from ACL */
@@ -234,7 +234,6 @@ int main (int argc, char* argv[]) {
       s = SetInterfaceOnNetworkElement(element, interface);
       interface = strtok(NULL, ",");
     }
-
     // Deploy to the network element
     s = DeployFiltersToElement(element);
 
