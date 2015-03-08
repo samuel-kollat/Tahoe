@@ -31,6 +31,7 @@ int main (int argc, char* argv[]) {
 
   char* config_filename = argv[1];
   printf("-- Config filename: %s\n", config_filename);
+  ahoj_svet();
   parse_config(config_filename);
 
   // select an application from database and fill it into internal structures
