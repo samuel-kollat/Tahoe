@@ -8,7 +8,11 @@ TQueueCallback SelectModule(char* name)
     {
         callback = Print;
     }
-    //elseif() ...
+    else if(strcmp(name, "pcap") == 0)
+    {
+        callback = Pcap;
+    }
+    //else if() ...
     else
     {
         callback = NULL;

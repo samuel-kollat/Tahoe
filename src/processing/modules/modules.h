@@ -5,6 +5,7 @@
 
 // Modules
 #include "print/print.h"
+#include "pcap/pcap.h"
 
 //
 TQueueCallback SelectModule(char* name);
