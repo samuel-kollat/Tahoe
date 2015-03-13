@@ -27,6 +27,8 @@ TMeStatus RegisterQueueCallback(TQueueCallback callback)
 {
   // Set global variable
   Proc_callback = callback;
+
+  return ME_OK;
 }
 
 void* processing(void *arg)

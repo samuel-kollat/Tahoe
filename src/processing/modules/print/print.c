@@ -6,7 +6,7 @@ void Print(TQueueItem* start, TQueueItem* stop)
 
     while(item != NULL)
     {
-        TPacket* packet = item->packet;
+        TPacket* packet = (TPacket*)item->packet;
         print_packet(packet);
 
         item = GetNextItem(item, stop);

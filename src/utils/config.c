@@ -43,7 +43,7 @@ TConfig* parse_config(char* config_filename)
 
 		if(line[0]=='[')
 			state = 0;
-		
+
 		if(strcmp(line, "[DATABASE]")==0)
 		{
 			state = 1;	// change state to database section
@@ -139,4 +139,6 @@ TConfig* parse_config(char* config_filename)
 
 		}
 	}
+
+	return NULL;
 }
