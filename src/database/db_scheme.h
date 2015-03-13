@@ -73,6 +73,9 @@ typedef struct filter {
 // TABLE analyzer
 typedef struct analyzer {
 	int id;
+	char* name;
+	char* description;
+	char* src;
 } TMAnalyzer;
 
 // TABLE application

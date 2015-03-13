@@ -70,8 +70,13 @@ TMApplication* get_application_mysql(int application_id)
 	application->analyzer = (TMAnalyzer*)malloc(sizeof(TMAnalyzer));
 	if(application->analyzer==NULL)
 		return NULL;
-	if(row[3]!=NULL)
+	if(row[3]!=NULL) {
 		application->analyzer->id = atoi(row[3]);
+		string_cpy(&(application->analyzer->name), row[4]);
+		string_cpy(&(application->analyzer->description), row[5]);
+		string_cpy(&(application->analyzer->src), row[6]);
+	}
+
 
 	return (TMApplication*) application;
 	
