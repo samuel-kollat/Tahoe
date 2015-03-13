@@ -4,3 +4,4 @@ obj/
 *.*~
 tutorial.properties
 config.dat
+*.o
