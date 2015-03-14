@@ -79,6 +79,14 @@ typedef struct analyzer {
 	char* args;
 } TMAnalyzer;
 
+typedef struct application_config TMApplication_config;
+typedef struct application_config {
+	int id;
+	char* config_name;
+	char* config_value;
+	TMApplication_config *next;
+} TMApplication_config;
+
 // TABLE application
 typedef struct application {
 	int id;
@@ -87,6 +95,7 @@ typedef struct application {
 	TMAnalyzer* analyzer;
 	TMFilter* filter;
 	TMRouter* router;
+	TMApplication_config *config;
 } TMApplication;
 
 #endif

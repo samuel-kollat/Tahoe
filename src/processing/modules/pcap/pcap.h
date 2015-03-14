@@ -25,12 +25,13 @@
 
 #include <pcap.h>
 
+#include "../../utils/config.h"
+
 #include "../../queues/queues.h"
 
 void Pcap(
     TQueueItem* start,
-    TQueueItem* stop,
-    TQueueCallbackArgs args
+    TQueueItem* stop
 );
 
 void open_pcap(

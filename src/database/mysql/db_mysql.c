@@ -78,6 +78,48 @@ TMApplication* get_application_mysql(int application_id)
 		string_cpy(&(application->analyzer->args), row[9]);
 	}
 
+	mysql_free_result(result);
+
+	sprintf(query_buffer, " \
+		SELECT application_config.id, application_config.config_name, application_config.config_value \
+		FROM application_config \
+		WHERE application_config.application_id = '%d'", application_id);
+	mysql_query(con, query_buffer);
+
+	result = mysql_store_result(con);
+	//printf("num-rows: %d\n", mysql_num_rows(result));
+
+	application->config = NULL;
+	if(mysql_num_rows(result)>0)
+	{
+		MYSQL_ROW row;
+		TMApplication_config* config = NULL;
+		while((row = mysql_fetch_row(result)))
+		{	
+			//TMApplication_config* config = 
+
+			TMApplication_config* last_config = config;
+			config = (TMApplication_config*)malloc(sizeof(TMApplication_config));		
+			if(config==NULL)
+				exit(1);
+
+			config->next=NULL;
+
+			if(last_config==NULL)
+				application->config = config;
+			else
+				last_config->next = config;
+			if(row[0]!=NULL)
+			{
+				config->id = atoi(row[0]);
+				string_cpy(&(config->config_name), row[1]);
+				string_cpy(&(config->config_value), row[2]);
+			}
+		}
+		mysql_free_result(result);
+
+	}
+
 
 	return (TMApplication*) application;
 	

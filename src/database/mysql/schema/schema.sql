@@ -80,6 +80,24 @@ CREATE TABLE IF NOT EXISTS `application` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `application_config`
+--
+
+CREATE TABLE IF NOT EXISTS `application_config` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_id` int(11) NOT NULL,
+  `config_name` varchar(255) NOT NULL,
+  `config_value` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+
+--
+-- Dumping data for table `application_config`
+--
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `certificate`
 --
 

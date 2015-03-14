@@ -35,6 +35,8 @@ int main (int argc, char* argv[]) {
 
   // select an application from database and fill it into internal structures
   TMApplication* application = get_application(config->application_id);
+  set_appl(application);
+
   // set root certificate
   set_root_cert_path(application->certificate->root_cert_path);
 
