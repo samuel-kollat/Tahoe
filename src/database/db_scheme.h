@@ -76,6 +76,7 @@ typedef struct analyzer {
 	char* name;
 	char* description;
 	char* src;
+	char* args;
 } TMAnalyzer;
 
 // TABLE application

@@ -253,6 +253,7 @@ int main (int argc, char* argv[]) {
 
   me_s = SetTypeOfQueue(ONLINE, 10, &Packet_queue);
   me_s = RegisterQueueCallback(SelectModule(application->analyzer->src));
+  me_s = RegisterQueueCallbackArgs(application->analyzer->args);
 
   pthread_t proc_thread;
   while(pthread_create(&proc_thread, NULL, processing, (void*)Packet_queue)!=0)

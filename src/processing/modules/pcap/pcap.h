@@ -29,7 +29,8 @@
 
 void Pcap(
     TQueueItem* start,
-    TQueueItem* stop
+    TQueueItem* stop,
+    TQueueCallbackArgs args
 );
 
 void open_pcap(

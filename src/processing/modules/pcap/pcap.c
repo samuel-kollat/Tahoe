@@ -5,18 +5,15 @@ pcap_dumper_t* pcap_dumpfile = NULL;
 
 typedef struct pcap_pkthdr pcap_pkthdr_t;
 
-void Pcap(TQueueItem* start, TQueueItem* stop)
+void Pcap(TQueueItem* start, TQueueItem* stop, TQueueCallbackArgs args)
 {
-	open_pcap("/tmp/out.pcap");
+	//printf("%s\n", args);
+	open_pcap(args);
 	TQueueItem* item = start;
 
     while(item != NULL)
     {
         TPacket* packet = item->packet;
-        //print_packet(packet);
-        //pcap_dump((u_char*)dumpfiles[dscp], header, packet);
-
-// onep_dpss_pkt_get_l2_start	(	onep_dpss_paktype_t * 	pak, uint8_t ** 	l2_start, uint32_t * 	l2_length )	
 
         uint8_t* packet_l2_start;
         uint32_t packet_l2_length;
@@ -30,41 +27,16 @@ void Pcap(TQueueItem* start, TQueueItem* stop)
 		};
 		*/
 
-		printf("%lu\n", item->timestamp.tv_nsec);
+		//printf("%lu\n", item->timestamp.tv_nsec);
 
 		pcap_pkthdr_t x = {{0, 0}, packet_l2_length, packet_l2_length};
-		printf("x:%d, t:%d\n", sizeof(struct pcap_pkthdr), sizeof(struct timeval));
+		//printf("x:%d, t:%d\n", sizeof(struct pcap_pkthdr), sizeof(struct timeval));
 
 		pcap_dump((u_char*)pcap_dumpfile, &x, packet_l2_start);
 
-        //printf("0x%1x 0x%1x 0x%1x\n", packet_l2_start[0], packet_l2_start[1], packet_l2_start[2]);
-
         item = GetNextItem(item, stop);
     }
-	printf("pcap!\n");
 }
-
-/*
-if (dumpfiles[dscp] == NULL) {
-        // name output file 
-        unsigned file_name_size = folder_name_len + 
-                                sizeof(PCAP_FILE_PREFIX) + 
-                                sizeof(PCAP_FILE_SUFFIX) +
-                                2 +  numbers in dscp tag 
-                                1;   end of string 
-        char file_name[file_name_size];
-        sprintf (file_name, "%s/%s%02u%s", folder, PCAP_FILE_PREFIX, dscp, PCAP_FILE_SUFFIX);
-        // open output file 
-        dumpfiles[dscp] = pcap_dump_open(handle, file_name);
-        if (dumpfiles[dscp] == NULL) {
-            fprintf(stderr, "Couldn't open output file.\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-     save the packet to the file 
-    pcap_dump((u_char*)dumpfiles[dscp], header, packet);
-*/
 
 void open_pcap(char* filename)
 {

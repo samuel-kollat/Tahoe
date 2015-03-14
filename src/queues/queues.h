@@ -14,6 +14,9 @@ typedef enum {
 // Additional parameter of a queue
 typedef int TQueueParam;
 
+// Arguments for callback function
+typedef char* TQueueCallbackArgs;
+
 // Type of packet
 typedef struct onep_dpss_paktype_* TPacket;
 

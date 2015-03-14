@@ -1,6 +1,6 @@
 #include "print.h"
 
-void Print(TQueueItem* start, TQueueItem* stop)
+void Print(TQueueItem* start, TQueueItem* stop, TQueueCallbackArgs args)
 {
     TQueueItem* item = start;
 

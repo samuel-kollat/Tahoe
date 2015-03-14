@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS `analyzer` (
   `name` varchar(45) DEFAULT NULL,
   `description` varchar(45) DEFAULT NULL,
   `src` varchar(128) DEFAULT NULL,
+  `args` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
 
