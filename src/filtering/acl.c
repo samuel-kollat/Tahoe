@@ -97,6 +97,15 @@ void ace_add_ip(onep_ace_t *ace,                // ACE
             goto cleanup;
         }
     }
+    else
+    {
+        rc = onep_acl_set_l3_ace_src_prefix(ace, NULL, 0);
+        if(rc != ONEP_OK) {
+            fprintf(stderr, "\nError in onep_acl_set_l3_ace_src_prefix : %d, %s\n",
+                rc, onep_strerror(rc));
+            goto cleanup;
+        }
+    }
 
     // 2. Set dest prefix
     if(dst_prefix != NULL)
@@ -108,6 +117,15 @@ void ace_add_ip(onep_ace_t *ace,                // ACE
         rc = onep_acl_set_l3_ace_dst_prefix(ace, sock_dst, dst_length);
         if(rc != ONEP_OK) {
             fprintf(stderr, "\nError in onep_acl_set_l3_ace_dst_prefix: %d, %s\n",
+                rc, onep_strerror(rc));
+            goto cleanup;
+        }
+    }
+    else
+    {
+        rc = onep_acl_set_l3_ace_dst_prefix(ace, NULL, 0);
+        if(rc != ONEP_OK) {
+            fprintf(stderr, "\nError in onep_acl_set_l3_ace_dst_prefix : %d, %s\n",
                 rc, onep_strerror(rc));
             goto cleanup;
         }
