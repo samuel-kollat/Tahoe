@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "onep_core_services.h"
+#include "onep_core_services.h" 
 #include "onep_policy_bulk.h"
 #include "onep_datapath_policy.h"
 #include "onep_class.h"
@@ -27,7 +27,8 @@
 
 void Print(
     TQueueItem* start,
-    TQueueItem* stop
+    TQueueItem* stop,
+    TQueueCallbackArgs args
 );
 
 void print_packet(

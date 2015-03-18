@@ -23,11 +23,19 @@
 #include "onep_dpss_flow.h"
 #include "onep_dpss_callback_framework.h"
 
+#include <pcap.h>
+
+#include "../../utils/config.h"
+
 #include "../../queues/queues.h"
 
 void Pcap(
     TQueueItem* start,
     TQueueItem* stop
+);
+
+void open_pcap(
+	char* filename
 );
 
 #endif

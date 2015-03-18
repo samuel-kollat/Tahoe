@@ -93,6 +93,7 @@ TQueueItem* InsertPacketToOnlineQueue(TQueue* queue,
     new_item->prev = queue->tail;
     new_item->backstop = false;
     new_item->param = -1;
+    clock_gettime(CLOCK_MONOTONIC, &(new_item->timestamp));
 
     queue->tail->next = new_item;
     queue->tail = new_item;

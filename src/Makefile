@@ -48,7 +48,7 @@ bin/tahoe: makedirs makeutil $(OBJSNETAPP)
 	@echo 'Invoking: GCC C Linker'
 	$(CC) -o $@ $(OBJSNETAPP) \
 			SessionElement/obj/session_element_util.o \
-			$(LD_FLAGS) $(LD_LIBDIRS) $(LD_LIBS) `mysql_config --cflags --libs`
+			$(LD_FLAGS) $(LD_LIBDIRS) $(LD_LIBS) -lpcap `mysql_config --cflags --libs`
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -125,7 +125,7 @@ obj/%.o: processing/modules/pcap/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
 	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
-		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -lpcap -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

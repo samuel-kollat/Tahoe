@@ -35,6 +35,8 @@ int main (int argc, char* argv[]) {
 
   // select an application from database and fill it into internal structures
   TMApplication* application = get_application(config->application_id);
+  set_appl(application);
+
   // set root certificate
   set_root_cert_path(application->certificate->root_cert_path);
 
@@ -252,7 +254,8 @@ int main (int argc, char* argv[]) {
   TMeStatus me_s;
 
   me_s = SetTypeOfQueue(ONLINE, 10, &Packet_queue);
-  me_s = RegisterQueueCallback(SelectModule("print"));
+  me_s = RegisterQueueCallback(SelectModule(application->analyzer->src));
+  me_s = RegisterQueueCallbackArgs(application->analyzer->args);
 
   pthread_t proc_thread;
   while(pthread_create(&proc_thread, NULL, processing, (void*)Packet_queue)!=0)
