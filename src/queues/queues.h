@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-// All types of queues
+// All types of queues - the best enum ever ! :P
 typedef enum {
     ONLINE,    // Share structures stored in RAM
     OFFLINE    // Files (.pcap) stored on disk

@@ -180,6 +180,10 @@ int main (int argc, char* argv[]) {
       {
         s = AddL7ProtocolToFilter(filter, RTCP);
       }
+      else if(strcmp(l7_protocol, "SIP")==0)
+      {
+        s = AddL7ProtocolToFilter(filter, SIP);
+      }
       else {
         printf("    -- UNKNOWN L7 protocol %s\n", l7_protocol);
       }
@@ -193,6 +197,7 @@ int main (int argc, char* argv[]) {
   // if there are no filters for the application
   if(application->filter==NULL)
   {
+    printf("    -- application->filter IS NULL\n");
     // Create new filter
     TFilterData* filter;
     s = GetEmptyFilter(&filter);
@@ -253,8 +258,10 @@ int main (int argc, char* argv[]) {
 
   TMeStatus me_s;
 
-  me_s = SetTypeOfQueue(ONLINE, 10, &Packet_queue);
-  me_s = RegisterQueueCallback(SelectModule("print"));
+
+  me_s = SetTypeOfQueue(ONLINE, 1, &Packet_queue);
+  me_s = RegisterQueueCallback(SelectModule(application->analyzer->src));
+  me_s = RegisterQueueCallbackArgs(application->analyzer->args);
 
   pthread_t proc_thread;
   while(pthread_create(&proc_thread, NULL, processing, (void*)Packet_queue)!=0)

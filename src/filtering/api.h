@@ -39,7 +39,8 @@ typedef enum {
     DHCP,
     CIFS,
     RTP,
-    RTCP
+    RTCP,
+    SIP
 } TL7Protocol;
 
 // Indentifier of L3 protocol

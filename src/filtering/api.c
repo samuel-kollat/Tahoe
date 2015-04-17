@@ -612,6 +612,9 @@ TApiStatus L7ProtocolToString(TL7Protocol protocol, char** value)
         case RTCP:
             *value = "rtcp";
             break;
+        case SIP:
+            *value = "sip";
+            break;
         default:
             *value = "";
             s = API_ERROR;

@@ -25,7 +25,9 @@ OBJSNETAPP += \
 	obj/callback.o \
 	obj/modules.o \
 	obj/queues.o \
-	cpp.o
+	obj/pcap.o \
+	obj/voip.o \
+	obj/sip_calls.o
 
 LD_LIBS += -lonep${ONEP_LBITS}_datapath
 
@@ -118,6 +120,22 @@ obj/%.o: processing/modules/print/%.c
 	@echo 'Invoking: GCC C Compiler'
 	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
 		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+obj/%.o: processing/modules/pcap/%.c
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C Compiler'
+	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
+		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -lpcap -o"$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+obj/%.o: processing/modules/voip/%.c
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C Compiler'
+	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
+		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -lpcap -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
