@@ -40,6 +40,7 @@
 
 static int filec = 0;
 static char *filev[FILEV_SIZE];
+static bool app_name_initialized = false;
 
 // START SNIPPET: c_global
 /* The following variables are required to connect to the network element: */
@@ -142,7 +143,7 @@ get_root_cert_path ()
     return root_cert_path;
 }
 
-void 
+void
 set_root_cert_path (char* _root_cert_path)
 {
     root_cert_path = _root_cert_path;
@@ -184,7 +185,7 @@ parse_options (int argc, char *argv[])
 
     int c;
     int option_index;
-    
+
     if (argc <= 1) {    /* No additional command-line arguments were given. */
         read_file(argv[0], "./tutorial.properties", &argc, &argv);
     }
@@ -248,7 +249,7 @@ get_usage_required_options (void)
 char *
 get_usage_optional_options (void)
 {
-    return 
+    return
         "[-t <transport type>] [-C <client cert file>] "
         "[-K <client private key file>] [-R <root certificates file>] "
         "[-P <tls pinning file>]";
@@ -272,7 +273,7 @@ void read_file(const char *arg0, const char *filename,
     int c;
     int n = 0;
     char arg_buffer[FILE_ARG_SIZE];
-    
+
     /*
      * If no file arguments have been stored, read the file and scan it for
      * arguments.
@@ -610,7 +611,7 @@ disconnect_network_element (onep_network_element_t **ne,
  *
  * Upon receipt of a certificate which could not be verified,
  * this callback asks the application whether to accept the
- * connection and/or whether to add the server to the pinning database. 
+ * connection and/or whether to add the server to the pinning database.
  * By default, the connection will be terminated and the pinning db will
  * remain unchanged.
  *
@@ -620,7 +621,7 @@ disconnect_network_element (onep_network_element_t **ne,
  *             name with a non-matching certificate, this will be the hash-type
  *             from that entry. If there was no entry, this will be created
  *             as "SHA-1".
- * @param [in] fingerprint pointer to the text fingerprint created from the 
+ * @param [in] fingerprint pointer to the text fingerprint created from the
  *          certificate. This will be a series of hex bytes separated by
  *          colons of the form "A1:B2:C3:..."
  * @param [in] changed is TRUE if there was an existing entry in the database
@@ -636,11 +637,11 @@ disconnect_network_element (onep_network_element_t **ne,
  */
 // START SNIPPET: onep_session_pin_handler
 onep_tls_pinning_cb_t
-accept_handler (const unsigned char *server_name,	
+accept_handler (const unsigned char *server_name,
 		const unsigned char *hash_type,
 		const unsigned char *fingerprint,
 		bool changed) {
-	
+
 	char decision[10];
 	if (changed) {
 		printf("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
@@ -726,12 +727,12 @@ create_session_config (onep_transport_mode_e mode, onep_session_config_t **confi
             fprintf(stderr, "\nUnknown transport mode: %d", mode);
             break;
     }
-    
-    
+
+
 
     /* Set the TLS attributes of the session. */
     if (mode == ONEP_SESSION_TLS) {
-    	
+
         rc = onep_session_config_set_tls(
             local_config,       /* Pointer to onep_session_config_t   */
             client_cert_path,   /* Client certificate file path  */
@@ -744,7 +745,7 @@ create_session_config (onep_transport_mode_e mode, onep_session_config_t **confi
                     rc, onep_strerror(rc));
             goto error_cleanup;
         }
-        
+
         /* Enable pinning */
          if (pin_file) {
         	 rc = onep_session_config_set_tls_pinning(local_config, pin_file,
@@ -756,7 +757,7 @@ create_session_config (onep_transport_mode_e mode, onep_session_config_t **confi
             	goto error_cleanup;
             }
          }
-            	
+
     }
 
     *config = local_config;
@@ -811,13 +812,18 @@ connect_network_element (char* hostname, char *username, char* password,
 
     // START SNIPPET: set_app_name
     /* Set the name of the network application. */
-    rc = onep_application_set_name(myapp, app_name);
-    if (rc != ONEP_OK) {
-       fprintf(stderr, "\nFailed to get network application name:"
-                        " errocode = %d, errormsg = %s",
-                        rc, onep_strerror(rc));
-        disconnect_network_element(NULL, NULL);
-        return NULL;
+    if(!app_name_initialized)
+    {
+        rc = onep_application_set_name(myapp, app_name);
+        if (rc != ONEP_OK) {
+           fprintf(stderr, "\nFailed to get network application name:"
+                            " errocode = %d, errormsg = %s",
+                            rc, onep_strerror(rc));
+            disconnect_network_element(NULL, NULL);
+            return NULL;
+        }
+
+        app_name_initialized = true;
     }
     // END SNIPPET: set_app_name
 
@@ -838,7 +844,7 @@ connect_network_element (char* hostname, char *username, char* password,
     // START SNIPPET: connect
     /* Create a session configuration. */
     if (strcasecmp(transport, "tipc") == 0
-    	|| strcmp(transport, "2") == 0) { 
+    	|| strcmp(transport, "2") == 0) {
         mode = ONEP_SESSION_LOCAL;
     } else {
     	mode = ONEP_SESSION_TLS;

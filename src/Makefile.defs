@@ -72,5 +72,5 @@ LD_LIBS := \
     -lonep${ONEP_LBITS}_core -lrt
 
 LD_FLAGS := \
-    -m${ONEP_LBITS} -fPIE  # -fPIE instead of -pie
+    -m${ONEP_LBITS} -pie
 

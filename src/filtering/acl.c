@@ -84,27 +84,51 @@ void ace_add_ip(onep_ace_t *ace,                // ACE
     struct sockaddr* sock_dst;
 
     // 1. Set src prefix
-    ip4addr_src.sin_family = AF_INET;
-    sock_src = (struct sockaddr*)&ip4addr_src;
-    inet_pton(AF_INET, src_prefix, &ip4addr_src.sin_addr);
+    if(src_prefix != NULL)
+    {
+        ip4addr_src.sin_family = AF_INET;
+        sock_src = (struct sockaddr*)&ip4addr_src;
+        inet_pton(AF_INET, src_prefix, &ip4addr_src.sin_addr);
 
-    rc = onep_acl_set_l3_ace_src_prefix(ace, sock_src, src_length);
-    if(rc != ONEP_OK) {
-        fprintf(stderr, "\nError in onep_acl_set_l3_ace_src_prefix : %d, %s\n",
-            rc, onep_strerror(rc));
-        goto cleanup;
+        rc = onep_acl_set_l3_ace_src_prefix(ace, sock_src, src_length);
+        if(rc != ONEP_OK) {
+            fprintf(stderr, "\nError in onep_acl_set_l3_ace_src_prefix : %d, %s\n",
+                rc, onep_strerror(rc));
+            goto cleanup;
+        }
+    }
+    else
+    {
+        rc = onep_acl_set_l3_ace_src_prefix(ace, NULL, 0);
+        if(rc != ONEP_OK) {
+            fprintf(stderr, "\nError in onep_acl_set_l3_ace_src_prefix : %d, %s\n",
+                rc, onep_strerror(rc));
+            goto cleanup;
+        }
     }
 
     // 2. Set dest prefix
-    ip4addr_dst.sin_family = AF_INET;
-    sock_dst = (struct sockaddr *)&ip4addr_dst;
-    inet_pton(AF_INET, dst_prefix, &ip4addr_dst.sin_addr);
+    if(dst_prefix != NULL)
+    {
+        ip4addr_dst.sin_family = AF_INET;
+        sock_dst = (struct sockaddr *)&ip4addr_dst;
+        inet_pton(AF_INET, dst_prefix, &ip4addr_dst.sin_addr);
 
-    rc = onep_acl_set_l3_ace_dst_prefix(ace, sock_dst, dst_length);
-    if(rc != ONEP_OK) {
-        fprintf(stderr, "\nError in onep_acl_set_l3_ace_dst_prefix: %d, %s\n",
-            rc, onep_strerror(rc));
-        goto cleanup;
+        rc = onep_acl_set_l3_ace_dst_prefix(ace, sock_dst, dst_length);
+        if(rc != ONEP_OK) {
+            fprintf(stderr, "\nError in onep_acl_set_l3_ace_dst_prefix: %d, %s\n",
+                rc, onep_strerror(rc));
+            goto cleanup;
+        }
+    }
+    else
+    {
+        rc = onep_acl_set_l3_ace_dst_prefix(ace, NULL, 0);
+        if(rc != ONEP_OK) {
+            fprintf(stderr, "\nError in onep_acl_set_l3_ace_dst_prefix : %d, %s\n",
+                rc, onep_strerror(rc));
+            goto cleanup;
+        }
     }
 
     cleanup:

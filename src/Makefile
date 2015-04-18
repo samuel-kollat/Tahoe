@@ -48,9 +48,9 @@ makeutil:
 bin/tahoe: makedirs makeutil $(OBJSNETAPP)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	g++ -o $@ $(OBJSNETAPP) \
+	$(CC) -o $@ $(OBJSNETAPP) \
 			SessionElement/obj/session_element_util.o \
-			$(LD_FLAGS) -rdynamic $(LD_LIBDIRS) $(LD_LIBS) `mysql_config --cflags --libs`
+			$(LD_FLAGS) $(LD_LIBDIRS) $(LD_LIBS) -lpcap `mysql_config --cflags --libs`
 	@echo 'Finished building target: $@'
 	@echo ' '
 

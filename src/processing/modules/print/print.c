@@ -1,12 +1,12 @@
 #include "print.h"
 
-void Print(TQueueItem* start, TQueueItem* stop)
+void Print(TQueueItem* start, TQueueItem* stop, TQueueCallbackArgs args)
 {
     TQueueItem* item = start;
 
     while(item != NULL)
     {
-        TPacket* packet = item->packet;
+        TPacket* packet = (TPacket*)item->packet;
         print_packet(packet);
 
         item = GetNextItem(item, stop);

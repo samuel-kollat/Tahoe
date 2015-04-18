@@ -31,11 +31,12 @@ int main (int argc, char* argv[]) {
 
   char* config_filename = argv[1];
   printf("-- Config filename: %s\n", config_filename);
-  ahoj_svet();
   parse_config(config_filename);
 
   // select an application from database and fill it into internal structures
   TMApplication* application = get_application(config->application_id);
+  set_appl(application);
+
   // set root certificate
   set_root_cert_path(application->certificate->root_cert_path);
 
@@ -107,8 +108,8 @@ int main (int argc, char* argv[]) {
         if(facl->pn_destination->greater_or_equal==facl->pn_destination->less_or_equal)
         {
           s = AddPortToFilter(filter, DST, facl->pn_destination->greater_or_equal);
+          printf("    -- added %d as DST port to filter\n", facl->pn_destination->greater_or_equal);
         }
-        printf("    -- added %d as DST port to filter\n", facl->pn_destination->greater_or_equal);
       }
 
       /* L3 PROTOCOLS from ACL */
@@ -240,7 +241,6 @@ int main (int argc, char* argv[]) {
       s = SetInterfaceOnNetworkElement(element, interface);
       interface = strtok(NULL, ",");
     }
-
     // Deploy to the network element
     s = DeployFiltersToElement(element);
 
@@ -257,7 +257,6 @@ int main (int argc, char* argv[]) {
    */
 
   TMeStatus me_s;
-
 
   me_s = SetTypeOfQueue(ONLINE, 1, &Packet_queue);
   me_s = RegisterQueueCallback(SelectModule(application->analyzer->src));

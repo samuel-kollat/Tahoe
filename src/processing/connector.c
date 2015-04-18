@@ -1,6 +1,7 @@
 #include "connector.h"
 
 TQueueCallback Proc_callback = NULL;
+TQueueCallbackArgs Proc_callback_args = NULL;
 
 void PrintMeErrorMessage(char* dst, char* msg)
 {
@@ -25,8 +26,18 @@ TMeStatus SetTypeOfQueue(TQueueType type,
 
 TMeStatus RegisterQueueCallback(TQueueCallback callback)
 {
-  // Set global variable
+  // Set global variable with analyzer name
   Proc_callback = callback;
+
+  return ME_OK;
+}
+
+TMeStatus RegisterQueueCallbackArgs(char *args)
+{
+  // Set global variable with arguments for selected analyzer
+  Proc_callback_args = args;
+
+  return ME_OK;
 }
 
 void* processing(void *arg)
@@ -52,8 +63,8 @@ void* processing(void *arg)
 
     pthread_mutex_unlock(&proc_mutex);
 
-    printf("callback(...)\n");
-    Proc_callback(start, stop);
+    //printf("callback(...)\n");
+    Proc_callback(start, stop, Proc_callback_args);
   }
 
 }

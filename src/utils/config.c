@@ -43,7 +43,7 @@ TConfig* parse_config(char* config_filename)
 
 		if(line[0]=='[')
 			state = 0;
-		
+
 		if(strcmp(line, "[DATABASE]")==0)
 		{
 			state = 1;	// change state to database section
@@ -139,4 +139,24 @@ TConfig* parse_config(char* config_filename)
 
 		}
 	}
+
+	return NULL;
+}
+
+char* get_config_value(char* config_name)
+{
+	TMApplication_config* c = config->application->config;
+	while(c!=NULL)
+	{
+		if(strcmp(config_name, c->config_name)==0)
+		{
+			return c->config_value;
+		}
+	}
+	return NULL;
+}
+
+void set_appl(TMApplication* app)
+{
+	config->application = app;
 }

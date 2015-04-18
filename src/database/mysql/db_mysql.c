@@ -35,7 +35,7 @@ TMApplication* get_application_mysql(int application_id)
 	sprintf(query_buffer, " \
 		SELECT application.id, application.name, application.certificate_id, application.analyzer_id, \
 			   analyzer.name, analyzer.description, analyzer.src, \
-			   certificate.name, certificate.root_cert_path \
+			   certificate.name, certificate.root_cert_path, analyzer.args \
 			FROM application \
 		LEFT JOIN certificate \
 			ON certificate.id = application.certificate_id \
@@ -70,8 +70,56 @@ TMApplication* get_application_mysql(int application_id)
 	application->analyzer = (TMAnalyzer*)malloc(sizeof(TMAnalyzer));
 	if(application->analyzer==NULL)
 		return NULL;
-	if(row[3]!=NULL)
+	if(row[3]!=NULL) {
 		application->analyzer->id = atoi(row[3]);
+		string_cpy(&(application->analyzer->name), row[4]);
+		string_cpy(&(application->analyzer->description), row[5]);
+		string_cpy(&(application->analyzer->src), row[6]);
+		string_cpy(&(application->analyzer->args), row[9]);
+	}
+
+	mysql_free_result(result);
+
+	sprintf(query_buffer, " \
+		SELECT application_config.id, application_config.config_name, application_config.config_value \
+		FROM application_config \
+		WHERE application_config.application_id = '%d'", application_id);
+	mysql_query(con, query_buffer);
+
+	result = mysql_store_result(con);
+	//printf("num-rows: %d\n", mysql_num_rows(result));
+
+	application->config = NULL;
+	if(mysql_num_rows(result)>0)
+	{
+		MYSQL_ROW row;
+		TMApplication_config* config = NULL;
+		while((row = mysql_fetch_row(result)))
+		{	
+			//TMApplication_config* config = 
+
+			TMApplication_config* last_config = config;
+			config = (TMApplication_config*)malloc(sizeof(TMApplication_config));		
+			if(config==NULL)
+				exit(1);
+
+			config->next=NULL;
+
+			if(last_config==NULL)
+				application->config = config;
+			else
+				last_config->next = config;
+			if(row[0]!=NULL)
+			{
+				config->id = atoi(row[0]);
+				string_cpy(&(config->config_name), row[1]);
+				string_cpy(&(config->config_value), row[2]);
+			}
+		}
+		mysql_free_result(result);
+
+	}
+
 
 	return (TMApplication*) application;
 	

@@ -4,15 +4,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 // All types of queues - the best enum ever ! :P
 typedef enum {
-    ONLINE,    // Share structures stored in RAM
-    OFFLINE    // Files (.pcap) stored on disk
+    ONLINE     // Share structures stored in RAM
 } TQueueType;
 
 // Additional parameter of a queue
 typedef int TQueueParam;
+
+// Arguments for callback function
+typedef char* TQueueCallbackArgs;
 
 // Type of packet
 typedef struct onep_dpss_paktype_* TPacket;
@@ -25,8 +28,9 @@ typedef struct Packet {
     TPacket packet;
     struct Packet* next;
     struct Packet* prev;
-    bool backstop;          // True if Backstop
-    int param;              // Additional info about Backstop
+    bool backstop;                  // True if Backstop
+    int param;                      // Additional info about Backstop
+    struct timespec timestamp;     // Seconds from 1970 and millisecond since the last second
 } TQueueItem;
 
 // Queue
@@ -88,18 +92,7 @@ TQueue* GetOnlineQueue(
 );
 
 //
-TQueue* GetOfflineQueue(
-    TQueueParam param
-);
-
-//
 TQueueItem* InsertPacketToOnlineQueue(
-    TQueue* queue,
-    TPacket packet
-);
-
-//
-TQueueItem* InsertPacketToOfflineQueue(
     TQueue* queue,
     TPacket packet
 );

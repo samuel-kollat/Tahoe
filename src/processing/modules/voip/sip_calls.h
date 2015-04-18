@@ -25,6 +25,11 @@ typedef enum {
 	CALL_DROPPED,
 } CallState;
 
+typedef enum {
+	UPFLOW,
+	DOWNFLOW
+} CallDirection;
+
 typedef struct RtpFlow {
 	unsigned int source_port;
 	unsigned int destination_port;
@@ -35,10 +40,12 @@ typedef struct SipCall {
 	CallState call_state;
 	char * source;			// Field "From:" from SIP header
 	char * destination;		// Field "To:" from SIP header
-	TRtpFlow *rtp_flow;
+	TRtpFlow *rtp_upflow;
+	TRtpFlow *rtp_downflow;
 } TSipCall;
 
-TSipCall *find_sip_call(TList * list, char * call_id);
+TSipCall * find_sip_call(TList * list, char * call_id);
+TRtpFlow * find_rtp_flow_by_ports(TList * list, CallDirection *direction, TSipCall * sip_call, unsigned int src_port, unsigned int dst_port);
 
 #endif
 

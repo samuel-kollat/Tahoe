@@ -15,9 +15,6 @@ TQueue* GetQueue(TQueueType type, TQueueParam param)
         case ONLINE:
             queue = GetOnlineQueue(param);
             break;
-        case OFFLINE:
-            queue = GetOfflineQueue(param);
-            break;
         default:
             PrintQueueErrorMessage("SetTypeOfQueue", "wrong type of queue");
             break;
@@ -58,14 +55,10 @@ TQueueItem* CreateBackstop()
     item->prev = NULL;
     item->backstop = true;
     item->param = 0;
+    // Timestamp
+    clock_gettime(CLOCK_MONOTONIC, &(item->timestamp));
 
     return item;
-}
-
-
-TQueue* GetOfflineQueue(TQueueParam param)
-{
-    return NULL;
 }
 
 TQueueItem* InsertPacketToQueue(TQueue* queue,
@@ -76,8 +69,6 @@ TQueueItem* InsertPacketToQueue(TQueue* queue,
     {
         case ONLINE:
             item = InsertPacketToOnlineQueue(queue, packet);
-            break;
-        case OFFLINE:
             break;
         default:
             PrintQueueErrorMessage("InsertPacketToQueue", "wrong queue type");
@@ -102,6 +93,7 @@ TQueueItem* InsertPacketToOnlineQueue(TQueue* queue,
     new_item->prev = queue->tail;
     new_item->backstop = false;
     new_item->param = -1;
+    clock_gettime(CLOCK_MONOTONIC, &(new_item->timestamp));
 
     queue->tail->next = new_item;
     queue->tail = new_item;
@@ -109,12 +101,6 @@ TQueueItem* InsertPacketToOnlineQueue(TQueue* queue,
     queue->backstop->param++;
 
     return new_item;
-}
-
-TQueueItem* InsertPacketToOfflineQueue(TQueue* queue,
-    TPacket packet)
-{
-    return NULL;
 }
 
 bool CompleteChunkInQueue(TQueue* queue)

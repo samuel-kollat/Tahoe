@@ -76,6 +76,47 @@ TSipCall * find_sip_call(TList * list, char * call_id)
 	return NULL;
 }
 
+
+TRtpFlow * find_rtp_flow_by_ports(TList * list, CallDirection *direction, TSipCall * sip_call, unsigned int src_port, unsigned int dst_port)
+{
+	if(list == NULL)
+		return NULL;
+
+	TListItem *item;
+
+	for(item = list->first; item != NULL; item = item->next)
+	{
+		//printf("src_port: %d, dst_port: %d, upflow-src: %d, upflow-dst: %d, downflow-src: %d, downflow-dst: %d\n", src_port, dst_port, ((TSipCall *) item->data)->rtp_upflow->source_port, ((TSipCall *) item->data)->rtp_upflow->destination_port, ((TSipCall *) item->data)->rtp_downflow->source_port, ((TSipCall *) item->data)->rtp_downflow->destination_port);
+		if(  ((TSipCall *) item->data)->rtp_upflow->source_port == src_port && ((TSipCall *) item->data)->rtp_upflow->destination_port == dst_port )
+		{
+			if(direction != NULL)
+			{
+				*direction = UPFLOW;
+			}
+			if(sip_call != NULL)
+			{
+				sip_call = (TSipCall *) (item->data);
+			}
+			return (TRtpFlow *) (((TSipCall *) (item->data)) -> rtp_upflow);
+		}
+		else if(  ((TSipCall *) item->data)->rtp_downflow->source_port == src_port && ((TSipCall *) item->data)->rtp_downflow->destination_port == dst_port )
+		{
+			if(direction != NULL)
+			{
+				*direction = DOWNFLOW;
+			}
+			if(sip_call != NULL)
+			{
+				sip_call = (TSipCall *) (item->data);
+			}
+			return (TRtpFlow *) (((TSipCall *) (item->data)) -> rtp_downflow);
+		}
+
+		//printf("%d\n", ((TSipCall *) item->data)->call_id );
+	}
+	return NULL;
+}
+
 void insert_sip_call(TList * list, TSipCall * sip_call)
 {
 	if(list == NULL)

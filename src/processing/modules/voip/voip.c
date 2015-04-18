@@ -2,6 +2,7 @@
 #include "sip_calls.h"
 
 TList *sip_calls = NULL;
+TList *rtp_flows = NULL;
 
 void Voip_initialize()
 {
@@ -10,6 +11,78 @@ void Voip_initialize()
 	if(sip_calls == NULL)
 		return;
 	slist_init(sip_calls);
+	// initialize list with RTP flows
+	rtp_flows = malloc(sizeof(TList));
+	if(rtp_flows == NULL)
+		return;
+	slist_init(rtp_flows);
+}
+
+uint32_t get_rtp_timestamp(RTP_header *rtp_header)
+{
+	return ntohl(rtp_header->timestamp);
+}
+
+uint8_t get_rtp_cc(RTP_header *rtp_header)
+{
+	return rtp_header->cc;
+}
+
+uint8_t get_rtp_extension(RTP_header *rtp_header)
+{
+	return rtp_header->extension;
+}
+
+uint8_t get_rtp_padding(RTP_header *rtp_header)
+{
+	return rtp_header->padding;
+}
+
+uint8_t get_rtp_version(RTP_header *rtp_header)
+{
+	return rtp_header->version;
+}
+
+uint8_t get_rtp_payload_type(RTP_header *rtp_header)
+{
+	return rtp_header->payload_type;
+}
+
+uint8_t get_rtp_m(RTP_header *rtp_header)
+{
+	return rtp_header->m;
+}
+
+uint16_t get_rtp_sequence_number(RTP_header *rtp_header)
+{
+	return ntohs(rtp_header->sequence_number);
+}
+
+uint32_t get_rtp_ssrc(RTP_header *rtp_header)
+{
+	return ntohl(rtp_header->ssrc);
+}
+
+uint32_t get_ip_src(L3_header *l3_header)
+{
+	return ntohl(l3_header->source_ip);
+}
+
+uint32_t get_ip_dst(L3_header *l3_header)
+{
+	return ntohl(l3_header->destination_ip);
+}
+
+uint16_t get_port_src(UDP_header *udp_header)
+{
+	printf("SRC: %d\n", ntohs(udp_header->source_port));
+	return ntohs(udp_header->source_port);
+}
+
+uint16_t get_port_dst(UDP_header *udp_header)
+{
+	printf("DST: %d\n", ntohs(udp_header->destination_port));
+	return ntohs(udp_header->destination_port);
 }
 
 /*
@@ -123,8 +196,6 @@ void Voip(TQueueItem* start, TQueueItem* stop)
 		Voip_initialize();		
 	}
 
-	printf("voip\n");
-
 	//printf("VoIP processing began!!!\n");
 
 	TQueueItem *item = start;
@@ -132,7 +203,7 @@ void Voip(TQueueItem* start, TQueueItem* stop)
 	while(item != NULL)
 	{
 		TPacket* packet = (TPacket*)item->packet;
-		printf("packet!\n");
+		//printf("packet!\n");
 	
 
 		// match SIP packets
@@ -141,6 +212,9 @@ void Voip(TQueueItem* start, TQueueItem* stop)
 		uint32_t payload_size;
 		onep_status_t s = onep_dpss_pkt_get_l2_start(item->packet, &payload, &payload_size);
 		//printf("onep_dpss_pkt_get_l2_start:%d %d %d\n", s, (s == ONEP_OK), (s == ONEP_ERR_BAD_ARGUMENT));
+
+		//get_port_src(payload + sizeof(L2_header) + sizeof(L3_header));
+		//return;	
 
 		// TODO - moze byt aj cez TCP ... !!!
 		uint32_t offset_to_siprtp = sizeof(L2_header) + sizeof(L3_header) + sizeof(UDP_header);
@@ -180,14 +254,14 @@ void Voip(TQueueItem* start, TQueueItem* stop)
 			Process_SIP(siprtp_payload);
 			//printf("x2\n");
 		} else {
-			Process_RTP(siprtp_payload);
+			Process_RTP(item, payload, payload_size, siprtp_payload);
 		}
 		// packet processing routine - SIP and RTP
 
 		// extract SOURCE IP, DESTINATION_IP, SOURCE_PORT, DESTINATION_PORT
 		item = GetNextItem(item, stop);
 	}
-	printf("koncim\n");
+	//printf("koncim\n");
 }
 
 char * extract_sip_header_field(uint8_t *payload, char *key)
@@ -219,27 +293,23 @@ char * get_sip_call_id(uint8_t *sip_payload)
 int Process_SIP(uint8_t * sip_payload)
 {
 	printf("Processing SIP\n");
+
 	// get SIP method
 	Sip_Method method = get_sip_method(sip_payload);
-	//printf("x4: %d\n", strlen(sip_payload));
+
 	//printf("Method: %s\n", print_sip_method(method));
 
 	// extract SIP Call-ID
-	//printf("x0: %d\n", strlen(sip_payload));
 	char * current_call_id = get_sip_call_id(sip_payload);
 	if(current_call_id == NULL)
 	{
 		// do not process, we cannot find Call-ID .. maybe incorrect SIP packet
 		printf("Cannot find Call-ID.\n");
-		//return NULL;
 	} else {	
 		//printf("Call-ID: %s\n", current_call_id);
 	}
-	//printf("%s\n", sip_payload);
-	//getchar();
 
 	// find this sip call
-
 	TSipCall * sip_call = find_sip_call(sip_calls, current_call_id);
 	if(sip_call == NULL)
 	{
@@ -253,8 +323,11 @@ int Process_SIP(uint8_t * sip_payload)
 
 		insert_sip_call(sip_calls, sip_call);
 
-		sip_call->rtp_flow = (TRtpFlow *)malloc(sizeof(TRtpFlow));
-		if(sip_call->rtp_flow == NULL)
+		sip_call->rtp_upflow = (TRtpFlow *)malloc(sizeof(TRtpFlow));
+		if(sip_call->rtp_upflow == NULL)
+			return;
+		sip_call->rtp_downflow = (TRtpFlow *)malloc(sizeof(TRtpFlow));
+		if(sip_call->rtp_downflow == NULL)
 			return;
 
 		//printf("Vytvoril som\n");
@@ -263,7 +336,7 @@ int Process_SIP(uint8_t * sip_payload)
 
 	/* Try to find the RTP port on which host will be waiting for the RTP packets */
 
-	if(method == SIP_INVITE)
+	/*if(method == SIP_INVITE)
 	{
 		printf("(%d)%s\n", strlen(sip_payload), sip_payload);
 		int i;		
@@ -272,28 +345,33 @@ int Process_SIP(uint8_t * sip_payload)
 			printf("%c (%d)\n", sip_payload[i], sip_payload[i] );
 			if(i%10==0)
 			{
-				getchar();
+				//getchar();
 			}
 		}
-	}
+	}*/
 
 	char * host_rtp_audio_port = extract_sip_header_field(sip_payload, "m=audio ");
 	if(host_rtp_audio_port != NULL)
 	{
 		int audio_port = atoi(host_rtp_audio_port);
-		printf("nasiel soooooooom port\n");
+		//printf("nasiel soooooooom port\n");
 		if(audio_port != 0)
 		{
+			//printf("method: %s\n", print_sip_method(method));
 			if (method == SIP_INVITE)
 			{
-				sip_call->rtp_flow->source_port = atoi(host_rtp_audio_port);
-				printf("source port: %d\n", sip_call->rtp_flow->source_port);
+				sip_call->rtp_upflow->source_port = atoi(host_rtp_audio_port);
+				sip_call->rtp_downflow->destination_port = atoi(host_rtp_audio_port);
+				printf("source port: %d\n", sip_call->rtp_upflow->source_port);
+				//getchar();
 			} else {
-				sip_call->rtp_flow->destination_port = atoi(host_rtp_audio_port);
-				printf("destination port: %d\n", sip_call->rtp_flow->destination_port);
+				sip_call->rtp_upflow->destination_port = atoi(host_rtp_audio_port);
+				sip_call->rtp_downflow->source_port = atoi(host_rtp_audio_port);
+				printf("destination port: %d %d\n", sip_call->rtp_upflow->destination_port);
+				//getchar();
 			}
 		}
-		getchar();
+		//getchar();
 		
 	}
 
@@ -333,12 +411,27 @@ int Process_SIP(uint8_t * sip_payload)
 	return 1;	
 }
 
-int Process_RTP()
+int Process_RTP(TQueueItem *queueItem, uint8_t *payload, uint32_t payload_size, uint8_t *rtp_payload)
 {
 	// extract header from RTP payload
 
+	CallDirection direction;
+	TSipCall * sip_call_to_rtp_flow;
 
+	TRtpFlow * rtp_flow = find_rtp_flow_by_ports(sip_calls, &direction, sip_call_to_rtp_flow, get_port_src( payload + sizeof(L2_header) + sizeof(L3_header) ), get_port_dst( payload + sizeof(L2_header) + sizeof(L3_header) ));
 
+	if(rtp_flow)
+	{
+		printf("nasiel som zodpovedajuci rtp_flow ");
+		if(direction == UPFLOW)
+			printf("UPFLOW\n");
+		else
+			printf("DOWNFLOW\n");
+	}
+
+	printf("Seq: %d, Timestamp: %d, Arrival time: %f\n", get_rtp_sequence_number(rtp_payload), get_rtp_timestamp(rtp_payload), (double)queueItem->timestamp.tv_nsec/1000000000 + queueItem->timestamp.tv_sec ); //(packet->timestamp->tv_sec + ((packet->timestamp->tv_nsec)/1000000000)));
+
+	//TRtpFlow *rtp_flow = sip_call->rtp_flow;
 
 
 	return 1;
