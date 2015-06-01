@@ -6,6 +6,7 @@
 // Modules
 #include "print/print.h"
 #include "pcap/pcap.h"
+#include "dns/dns.h"
 
 //
 TQueueCallback SelectModule(char* name);

@@ -83,13 +83,13 @@ int main (int argc, char* argv[]) {
       if(facl->ip_source!=NULL)
       {
         s = AddIPv4ToFilter(filter, SRC, facl->ip_source->address, facl->ip_source->mask);
-        printf("    -- added SRC to filter: %s\n", facl->ip_source->address);
+        printf("    -- added SRC IP to filter: %s\n", facl->ip_source->address);
       }
       /* DESTINATION IP ADDRESS */
       if(facl->ip_destination!=NULL)
       {
         s = AddIPv4ToFilter(filter, DST, facl->ip_destination->address, facl->ip_destination->mask);
-        printf("    -- added DSTIP to filter: %s\n", facl->ip_destination->address);
+        printf("    -- added DST IP to filter: %s\n", facl->ip_destination->address);
       }
 
       /* SOURCE PORTS */
@@ -98,8 +98,8 @@ int main (int argc, char* argv[]) {
         if(facl->pn_source->greater_or_equal==facl->pn_source->less_or_equal)
         {
           s = AddPortToFilter(filter, SRC, facl->pn_source->greater_or_equal);
+          printf("    -- added %d as SRC port to filter\n", facl->pn_source->greater_or_equal);
         }
-        printf("    -- added %d as SRC port to filter\n", facl->pn_source->greater_or_equal);
       }
 
       /* DESTINATION PORTS */
@@ -253,7 +253,7 @@ int main (int argc, char* argv[]) {
 
   TMeStatus me_s;
 
-  me_s = SetTypeOfQueue(ONLINE, 10, &Packet_queue);
+  me_s = SetTypeOfQueue(ONLINE, 1, &Packet_queue);
   me_s = RegisterQueueCallback(SelectModule(application->analyzer->src));
   me_s = RegisterQueueCallbackArgs(application->analyzer->args);
 

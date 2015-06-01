@@ -12,9 +12,14 @@ TQueueCallback SelectModule(char* name)
     {
         callback = Pcap;
     }
+    else if(strcmp(name, "dns") == 0)
+    {
+        callback = AnalyzeDns;
+    }
     //else if() ...
     else
     {
+        fprintf(stderr, "Warning: No callback added!\n");
         callback = NULL;
     }
 
