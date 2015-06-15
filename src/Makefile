@@ -24,6 +24,7 @@ OBJSNETAPP += \
 	obj/connector.o \
 	obj/callback.o \
 	obj/modules.o \
+	obj/parsers.o \
 	obj/queues.o \
 	obj/pcap.o \
 	obj/dns.o
@@ -111,6 +112,14 @@ obj/%.o: processing/modules/%.c
 	@echo 'Invoking: GCC C Compiler'
 	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
 		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+obj/%.o: processing/protocols/%.c
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C Compiler'
+	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
+		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -lpcap -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

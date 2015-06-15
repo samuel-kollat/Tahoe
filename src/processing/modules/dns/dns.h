@@ -23,12 +23,18 @@
 #include "onep_dpss_flow.h"
 #include "onep_dpss_callback_framework.h"
 
-#include "../../queues/queues.h"
+#include "../../../queues/queues.h"
+
+#include "../../protocols/parsers.h"
 
 void AnalyzeDns(
     TQueueItem* start,
     TQueueItem* stop,
     TQueueCallbackArgs args
+);
+
+void Analyze(
+    TPacket* packet
 );
 
 #endif
