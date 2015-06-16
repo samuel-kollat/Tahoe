@@ -27,6 +27,8 @@
 
 #include "../../protocols/parsers.h"
 
+#include "dns_resolutions.h"
+
 void AnalyzeDns(
     TQueueItem* start,
     TQueueItem* stop,

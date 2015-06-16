@@ -32,4 +32,14 @@ void parse_dns_message(
     dns_message* message
 );
 
+void ip_to_str(
+    uint8_t ip[4],
+    char** str
+);
+
+void domain_to_str(
+    uint8_t* domain,
+    char** str
+);
+
 #endif

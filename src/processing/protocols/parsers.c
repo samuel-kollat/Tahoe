@@ -120,3 +120,58 @@ void parse_dns_message(uint8_t* packet, uint32_t packet_length, dns_message* mes
     // TODO
 
 }
+
+void ip_to_str(uint8_t ip[4], char** str)
+{
+    (*str) = (char*)malloc(16 * sizeof(char));
+    if(*str == NULL)
+    {
+        fprintf(stderr, "Error: Malloc failed [ip_to_str].\n");
+        return;
+    }
+    sprintf((*str), "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+}
+
+void domain_to_str(uint8_t* domain, char** str)
+{
+    if(domain == NULL)
+    {
+        fprintf(stderr, "No domain to query.\n");
+        return;
+    }
+
+    // Count characters
+    int i = 0;
+    char c = (char)domain[i];
+    while(c != '\0')
+    {
+        i++;
+        c = (char)domain[i];
+    }
+
+    // Allocation
+    (*str) = (char*)malloc((i+1) * sizeof(char));
+    if(*str == NULL)
+    {
+        fprintf(stderr, "Error: Malloc failed [domain_to_str].\n");
+        return;
+    }
+
+    // To string
+    i = 0;
+    c = (char)domain[i];
+    while(c != '\0')
+    {
+        if(c < 33)
+        {
+            (*str)[i] = '.';
+        }
+        else
+        {
+            (*str)[i] = c;
+        }
+        i++;
+        c = (char)domain[i];
+    }
+    (*str)[i] = '\0';
+}

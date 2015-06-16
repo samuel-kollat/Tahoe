@@ -27,7 +27,8 @@ OBJSNETAPP += \
 	obj/parsers.o \
 	obj/queues.o \
 	obj/pcap.o \
-	obj/dns.o
+	obj/dns.o \
+	obj/dns_resolutions.o
 
 LD_LIBS += -lonep${ONEP_LBITS}_datapath
 

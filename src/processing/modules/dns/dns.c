@@ -15,8 +15,7 @@ void AnalyzeDns(TQueueItem* start, TQueueItem* stop, TQueueCallbackArgs args)
 
 void Analyze(TPacket* packet)
 {
-    printf("Analyzing ...\n");
-
+    // Get payload
     uint8_t* payload;
     uint32_t payload_size;
     onep_status_t s = onep_dpss_pkt_get_l2_start((onep_dpss_paktype_t*)packet, &payload, &payload_size);
@@ -26,6 +25,7 @@ void Analyze(TPacket* packet)
         return;
     }
 
+    // DEBUG
     uint32_t i;
     for(i = 0; i < payload_size; i++)
     {
@@ -33,6 +33,7 @@ void Analyze(TPacket* packet)
     }
     printf("\nEnd.\n\n");
 
+    // Parse payload
     l2_header l2;
     l3_header l3;
     udp_header udp;
@@ -43,34 +44,16 @@ void Analyze(TPacket* packet)
     parse_l4_udp_header(payload, &udp);
     parse_dns_message(payload, payload_size, &query);
 
-    printf("SRC IP: %u.%u.%u.%u\n", l3.source_ip[0], l3.source_ip[1], l3.source_ip[2], l3.source_ip[3]);
-    printf("DST IP: %u.%u.%u.%u\n", l3.destination_ip[0], l3.destination_ip[1], l3.destination_ip[2], l3.destination_ip[3]);
+    // Store parsed DNS data
+    store_dns_message(&l3, &udp, &query);
 
-    printf("SRC PORT: %u\n", udp.source_port);
-    printf("DST PORT: %u\n", udp.destination_port);
-
-    if(query.query->query_domain_name == NULL)
+    // DEBUG
+    TResolutionItem* item = get_dns_resolutions_list();
+    while(item != NULL)
     {
-        fprintf(stderr, "No domain to query.\n");
-        return;
+        print_dns_resolution_data(item);
+        item = item->next;
     }
-    printf("DNS QUERY DOMAIN: ");
-    i = 0;
-    char c = (char)query.query->query_domain_name[i];
-    while(c != '\0')
-    {
-        if(c < 33)
-        {
-            printf(".");
-        }
-        else
-        {
-            printf("%c", c);
-        }
-        i++;
-        c = (char)query.query->query_domain_name[i];
-    }
-    printf("\n\n");
 
     return;
 }
