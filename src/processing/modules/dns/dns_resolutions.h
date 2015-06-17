@@ -22,7 +22,7 @@ typedef struct
     uint8_t dst_ip[4];
     uint16_t src_port;
     uint16_t dst_port;
-    // TODO
+    uint8_t** data;
 } TDnsResponse;
 
 typedef struct {

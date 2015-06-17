@@ -7,6 +7,21 @@
 
 #define DNS_QUERY_KNOWN_FIELDS_LENGTH 16
 
+typedef enum {
+    DNS_OK,
+    DNS_FORMAT_ERROR,
+    DNS_NOT_IMPLEMENTED
+} dns_status;
+
+typedef enum {
+    DNS_REC_A = 1,
+    DNS_REC_NS = 2,
+    DNS_REC_CNAME = 5,
+    DNS_REC_SOA = 6,
+    DNS_REC_MX = 15,
+    DNS_REC_AAA = 28,
+} dns_qtype;
+
 typedef struct {
     uint8_t identifier[2];
     uint8_t query_response_flag : 1;
@@ -25,6 +40,7 @@ typedef struct {
 
 typedef struct
 {
+    uint16_t query_domain_name_length;
     uint8_t* query_domain_name;
     uint16_t query_type;
     uint16_t query_class;
@@ -32,10 +48,10 @@ typedef struct
 
 typedef struct response_section {
     uint8_t* domain_name;
-    uint8_t type[2];
-    uint8_t inet_class[2];
-    uint8_t ttl[4];
-    uint8_t data_length[2];
+    uint16_t type;
+    uint16_t inet_class;
+    uint32_t ttl;
+    uint16_t data_length;
     uint8_t* resource_data;
     struct response_section* next_section;
 } dns_response_section;
@@ -50,6 +66,7 @@ typedef struct {
     dns_header* header;
     dns_query* query;
     dns_response* response;
+    dns_status status;
 } dns_message;
 
 #endif

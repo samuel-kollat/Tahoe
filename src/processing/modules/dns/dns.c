@@ -25,14 +25,6 @@ void Analyze(TPacket* packet)
         return;
     }
 
-    // DEBUG
-    uint32_t i;
-    for(i = 0; i < payload_size; i++)
-    {
-        printf("| %02x ", payload[i]);
-    }
-    printf("\nEnd.\n\n");
-
     // Parse payload
     l2_header l2;
     l3_header l3;
@@ -44,15 +36,26 @@ void Analyze(TPacket* packet)
     parse_l4_udp_header(payload, &udp);
     parse_dns_message(payload, payload_size, &query);
 
-    // Store parsed DNS data
-    store_dns_message(&l3, &udp, &query);
-
-    // DEBUG
-    TResolutionItem* item = get_dns_resolutions_list();
-    while(item != NULL)
+    if(query.status == DNS_OK)
     {
-        print_dns_resolution_data(item);
-        item = item->next;
+        // Store parsed DNS data
+        store_dns_message(&l3, &udp, &query);
+
+        // DEBUG
+        uint32_t i;
+        for(i = 0; i < payload_size; i++)
+        {
+            printf("| %02x ", payload[i]);
+        }
+        printf("\nEnd.\n\n");
+
+        // DEBUG
+        TResolutionItem* item = get_dns_resolutions_list();
+        while(item != NULL)
+        {
+            print_dns_resolution_data(item);
+            item = item->next;
+        }
     }
 
     return;

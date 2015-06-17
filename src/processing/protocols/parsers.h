@@ -42,4 +42,8 @@ void domain_to_str(
     char** str
 );
 
+uint16_t dns_fqdn_length(
+    uint8_t* data
+);
+
 #endif

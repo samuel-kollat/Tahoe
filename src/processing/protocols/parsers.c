@@ -76,6 +76,9 @@ void parse_dns_message(uint8_t* packet, uint32_t packet_length, dns_message* mes
         return;
     }
 
+    // Status
+    message->status = DNS_FORMAT_ERROR;
+
     // Parsing
     int offset = L2_HEADER_LENGTH + L3_HEADER_LENGTH + UDP_HEADER_LENGTH;
 
@@ -94,8 +97,27 @@ void parse_dns_message(uint8_t* packet, uint32_t packet_length, dns_message* mes
 
     // *******
     // Query
+    // http://maradns.samiam.org/multiple.qdcount.html: for QCOUNT > 1
     // *******
-    int query_domain_name_length = packet_length - offset - DNS_QUERY_KNOWN_FIELDS_LENGTH;  // WARNING: working only for query, response must be processed differently !!!!
+    if(message->header->question_count != 1)
+    {
+        fprintf(stderr, "QCOUNT: %u\n", message->header->question_count);
+        return;
+    }
+
+    int query_domain_name_length = 0;
+    if(message->header->answer_count + message->header->authority_record_count + message->header->additional_record_count == 0)
+    {
+        // Query
+        query_domain_name_length = packet_length - offset - DNS_QUERY_KNOWN_FIELDS_LENGTH;
+    }
+    else
+    {
+        // Response
+        query_domain_name_length = dns_fqdn_length(&(packet[offset + 12]));
+    }
+    message->query->query_domain_name_length = query_domain_name_length;
+
     message->query->query_domain_name = (uint8_t*)malloc(query_domain_name_length * sizeof(uint8_t));
     if(message->query->query_domain_name == NULL)
     {
@@ -113,12 +135,119 @@ void parse_dns_message(uint8_t* packet, uint32_t packet_length, dns_message* mes
     message->query->query_type = packet[offset + 12]*16 + packet[offset + 13];
     message->query->query_class = packet[offset + 14]*16 + packet[offset + 15];
 
+    if(message->query->query_type != DNS_REC_A)
+    {
+        fprintf(stderr, "[Skip] Query Type: %u\n", message->query->query_type);
+        message->status = DNS_NOT_IMPLEMENTED;
+        return;
+    }
+
     // *******
     // Response
     // *******
 
-    // TODO
+    // Answers
+    message->response->answer = NULL;
+    offset = offset + 16;
+    dns_response_section* previous_section = NULL;
+    for(i = 0; i < message->header->answer_count; i++)
+    {
+        // Allocation
+        dns_response_section* rs = (dns_response_section*)malloc(sizeof(dns_response_section));
+        if(message->response == NULL)
+        {
+            fprintf(stderr, "Error: malloc (parse_dns_message / response_section)\n");
+            return;
+        }
 
+        // Name
+        if( (packet[offset + 0] & 0b11000000) == 0)        // label
+        {
+            // TODO
+            fprintf(stderr, "Error: LABEL (parse_dns_message / response_section)\n");
+        }
+        else if( (packet[offset + 0] & 0b11000000) == 192) // pointer
+        {
+            // TODO
+        }
+        else
+        {
+            fprintf(stderr, "Answer NAME: %u\n", packet[offset + 1]);
+            return;
+        }
+
+        // Params
+        rs->type = packet[offset + 2]*16 + packet[offset + 3];
+        rs->inet_class = packet[offset + 4]*16 + packet[offset + 5];
+        rs->ttl = packet[offset + 6]*16*16*16 + packet[offset + 7]*16*16 + packet[offset + 8]*16 + packet[offset + 9];
+
+        // Data
+        rs->data_length = packet[offset + 10]*16 + packet[offset + 11];
+        rs->resource_data = NULL;
+
+        if(rs->type != DNS_REC_A || rs->data_length != 4)
+        {
+            offset = offset + 12 + rs->data_length;
+
+            free(rs);
+            continue;
+        }
+
+        rs->resource_data = (uint8_t*)malloc(4 * sizeof(uint8_t));
+        if(rs->resource_data == NULL)
+        {
+            fprintf(stderr, "Error: malloc (parse_dns_message / resource_data)\n");
+            return;
+        }
+
+        rs->resource_data[0] = packet[offset + 12];
+        rs->resource_data[1] = packet[offset + 13];
+        rs->resource_data[2] = packet[offset + 14];
+        rs->resource_data[3] = packet[offset + 15];
+
+        // List
+        rs->next_section = NULL;
+        if(previous_section != NULL)
+        {
+            previous_section->next_section = rs;
+        }
+        else
+        {
+            message->response->answer = rs;
+        }
+        previous_section = rs;
+
+        offset = offset + 12 + rs->data_length;
+    }
+
+    // Authority - skip
+    message->response->authoritative_name_servers = NULL;
+
+    // Additional - skip
+    message->response->additional_records = NULL;
+
+    // Status
+    message->status = DNS_OK;
+    return;
+}
+
+uint16_t dns_fqdn_length(uint8_t* data)
+{
+    int length = 0;
+
+    while(data[length] != 0)
+    {
+        if(data[length] <= 31)
+        {
+            length += data[length] + 1;
+        }
+        else
+        {
+            continue;
+        }
+    }
+
+    return length + 1;
 }
 
 void ip_to_str(uint8_t ip[4], char** str)
