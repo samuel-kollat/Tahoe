@@ -85,6 +85,7 @@ void store_dns_message(l3_header* l3,udp_header* l4, dns_message* message)
     TResolutionItem* item = (TResolutionItem*) malloc(sizeof(TResolutionItem));
 
     item->processed = false;
+    item->saved = false;
 
     item->resolution.transaction_id[0] = message->header->identifier[0];
     item->resolution.transaction_id[1] = message->header->identifier[1];

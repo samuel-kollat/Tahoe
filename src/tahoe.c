@@ -9,6 +9,8 @@
 // Define global variables
 pthread_mutex_t proc_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t proc_cond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t store_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t store_cond = PTHREAD_COND_INITIALIZER;
 TQueue* Packet_queue = NULL;
 
 
@@ -257,6 +259,7 @@ int main (int argc, char* argv[]) {
   me_s = RegisterQueueCallback(SelectModule(application->analyzer->src));
   me_s = RegisterQueueCallbackArgs(application->analyzer->args);
 
+  // Middlend Thread
   pthread_t proc_thread;
   while(pthread_create(&proc_thread, NULL, processing, (void*)Packet_queue)!=0)
   {
@@ -265,21 +268,39 @@ int main (int argc, char* argv[]) {
     exit(EXIT_FAILURE);
   }
 
-   last_pak_count = 0;
-   /* wait to query the packet loop for the number
-    * of packets received and processed. */
-   printf ("\n\nWaiting for packets...\n");
-   while (1) {
-      sleep(timeout);
-      (void) onep_dpss_packet_callback_rx_count(&pak_count);
-      fprintf(stderr, "Current Packet Count: %"PRIu64"\n", pak_count);
-      if (pak_count == last_pak_count) {
-        break;
-      } else {
-        last_pak_count = pak_count;
-        loop_count++;
-      }
-   }
+  // Set callback for data storing
+  RegisterStoreCallbacks(
+    SelectStoreReady(application->analyzer->src),
+    SelectStorePrepare(application->analyzer->src),
+    SelectStoreModule(application->analyzer->src),
+    SelectStoreCondition(application->analyzer->src)
+  );
+
+  // Storing Thread
+  pthread_t store_thread;
+  while(pthread_create(&store_thread, NULL, storing, NULL)!=0)
+  {
+    if (errno == EAGAIN) continue;
+    fprintf(stderr, "Cannot create new thread. Exiting...\n");
+    exit(EXIT_FAILURE);
+  }
+
+
+  last_pak_count = 0;
+  /* wait to query the packet loop for the number
+  * of packets received and processed. */
+  printf ("\n\nWaiting for packets...\n");
+  while (1) {
+    sleep(timeout);
+    (void) onep_dpss_packet_callback_rx_count(&pak_count);
+    fprintf(stderr, "Current Packet Count: %"PRIu64"\n", pak_count);
+    if (pak_count == last_pak_count) {
+      break;
+    } else {
+      last_pak_count = pak_count;
+      loop_count++;
+    }
+  }
 
    printf("\nDone. Goodbye!");
    printf("\n\n******* DISCONNECT AND CLEAN UP *******\n\n");

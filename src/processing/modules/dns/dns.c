@@ -1,5 +1,7 @@
 #include "dns.h"
 
+static bool data_ready_for_storing = false;
+
 void AnalyzeDns(TQueueItem* start, TQueueItem* stop, TQueueCallbackArgs args)
 {
     TQueueItem* item = start;
@@ -56,7 +58,33 @@ void Analyze(TPacket* packet)
             print_dns_resolution_data(item);
             item = item->next;
         }
+
+        // Store data to permanent place
+        // Wakes up storing thread
+        call_storing();
     }
 
+    return;
+}
+
+bool DnsDataReady()
+{
+    return data_ready_for_storing;
+}
+
+void DnsDataPrepare()
+{
+    data_ready_for_storing = false;
+    return;
+}
+
+void DnsDataCondition()
+{
+    data_ready_for_storing = true;
+}
+
+void DnsStore()
+{
+    printf("[Thread] Data Stored.\n");
     return;
 }

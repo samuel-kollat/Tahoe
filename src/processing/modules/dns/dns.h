@@ -24,10 +24,9 @@
 #include "onep_dpss_callback_framework.h"
 
 #include "../../../queues/queues.h"
-
 #include "../../protocols/parsers.h"
-
 #include "dns_resolutions.h"
+#include "../../storing.h"
 
 void AnalyzeDns(
     TQueueItem* start,
@@ -37,6 +36,18 @@ void AnalyzeDns(
 
 void Analyze(
     TPacket* packet
+);
+
+bool DnsDataReady(
+);
+
+void DnsDataPrepare(
+);
+
+void DnsDataCondition(
+);
+
+void DnsStore(
 );
 
 #endif

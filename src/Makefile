@@ -24,6 +24,7 @@ OBJSNETAPP += \
 	obj/connector.o \
 	obj/callback.o \
 	obj/modules.o \
+	obj/storing.o \
 	obj/parsers.o \
 	obj/queues.o \
 	obj/pcap.o \

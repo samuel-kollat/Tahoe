@@ -33,6 +33,7 @@ typedef struct {
 
 typedef struct ResolutionItem {
     bool processed;
+    bool saved;
     TResolution resolution;
     struct ResolutionItem* next;
 } TResolutionItem;
