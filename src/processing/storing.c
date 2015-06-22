@@ -34,7 +34,6 @@ void* storing(void *arg)
 
         pthread_mutex_unlock(&store_mutex);
 
-        printf("storing(...)\n");
         Store_callback();
     }
 }

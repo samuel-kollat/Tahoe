@@ -74,6 +74,8 @@ void store_dns_message(l3_header* l3,udp_header* l4, dns_message* message)
                     section = section->next_section;
                     i++;
                 }
+
+                SetItemAsProcessed(item);
             }
             return;
         }
@@ -111,6 +113,47 @@ void store_dns_message(l3_header* l3,udp_header* l4, dns_message* message)
     head = item;
 }
 
+TResolutionItem* GetNextProcessedItem(TResolutionItem* iter)
+{
+    if(iter == NULL)
+    {
+        iter = head;
+    }
+    else
+    {
+        iter = iter->next;
+    }
+
+    TResolutionItem* item = NULL;
+    while(iter != NULL)
+    {
+        if(iter->processed == true)
+        {
+            item = iter;
+            break;
+        }
+        iter = iter->next;
+    }
+
+    return item;
+}
+
+void SetItemAsProcessed(TResolutionItem* item)
+{
+    if(item != NULL)
+    {
+        item->processed = true;
+    }
+}
+
+void SetItemAsSaved(TResolutionItem* item)
+{
+    if(item != NULL)
+    {
+        item->saved = true;
+    }
+}
+
 void print_dns_resolution_data(TResolutionItem* item)
 {
     char* str;
@@ -138,6 +181,8 @@ void print_dns_resolution_data(TResolutionItem* item)
             i++;
         }
     }
+
+    printf("|\tProcessed: %d\n", item->processed);
 
     printf("\n");
 }

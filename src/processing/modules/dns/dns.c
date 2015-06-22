@@ -75,7 +75,6 @@ bool DnsDataReady()
 void DnsDataPrepare()
 {
     data_ready_for_storing = false;
-    return;
 }
 
 void DnsDataCondition()
@@ -85,6 +84,14 @@ void DnsDataCondition()
 
 void DnsStore()
 {
-    printf("[Thread] Data Stored.\n");
+    TResolutionItem* prev_item = NULL;
+    TResolutionItem* item = NULL;
+    while((item = GetNextProcessedItem(prev_item)) != NULL)
+    {
+        printf("[Thread] Data Stored.\n");
+        SetItemAsSaved(item);
+        prev_item = item;
+    }
+
     return;
 }

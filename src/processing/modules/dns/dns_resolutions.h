@@ -47,6 +47,18 @@ void store_dns_message(
     dns_message* message
 );
 
+TResolutionItem* GetNextProcessedItem(
+    TResolutionItem* iter
+);
+
+void SetItemAsProcessed(
+    TResolutionItem* item
+);
+
+void SetItemAsSaved(
+    TResolutionItem* item
+);
+
 void print_dns_resolution_data(
     TResolutionItem* item
 );
