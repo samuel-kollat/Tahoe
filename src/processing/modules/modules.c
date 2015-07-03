@@ -16,6 +16,10 @@ TQueueCallback SelectModule(char* name)
     {
         callback = AnalyzeDns;
     }
+    else if(strcmp(name, "http") == 0)
+    {
+        callback = AnalyzeHttp;
+    }
     //else if() ...
     else
     {
@@ -33,6 +37,10 @@ TStoreDataReadyCallback SelectStoreReady(char* name)
     if(strcmp(name, "dns") == 0)
     {
         callback = DnsDataReady;
+    }
+    else if(strcmp(name, "http") == 0)
+    {
+        callback = HttpDataReady;
     }
     //else if() ...
     else
@@ -52,6 +60,10 @@ TStorePrepareDataCallback SelectStorePrepare(char* name)
     {
         callback = DnsDataPrepare;
     }
+    else if(strcmp(name, "http") == 0)
+    {
+        callback = HttpDataPrepare;
+    }
     //else if() ...
     else
     {
@@ -70,6 +82,10 @@ TStoreConditionCallback SelectStoreCondition(char* name)
     {
         callback = DnsDataCondition;
     }
+    else if(strcmp(name, "http") == 0)
+    {
+        callback = HttpDataCondition;
+    }
     //else if() ...
     else
     {
@@ -87,6 +103,10 @@ TStoreCallback SelectStoreModule(char* name)
     if(strcmp(name, "dns") == 0)
     {
         callback = DnsStore;
+    }
+    else if(strcmp(name, "http") == 0)
+    {
+        callback = HttpStore;
     }
     //else if() ...
     else

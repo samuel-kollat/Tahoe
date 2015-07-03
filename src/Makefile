@@ -12,6 +12,7 @@ OBJSNETAPP += \
 	obj/tahoe_util.o \
 	obj/db_wrapper.o \
 	obj/db_mysql.o \
+	obj/hash.o \
 	obj/action.o \
 	obj/policy_map.o \
 	obj/class_map.o \
@@ -29,7 +30,9 @@ OBJSNETAPP += \
 	obj/queues.o \
 	obj/pcap.o \
 	obj/dns.o \
-	obj/dns_resolutions.o
+	obj/dns_resolutions.o \
+	obj/http.o \
+	obj/http_statistics.o
 
 LD_LIBS += -lonep${ONEP_LBITS}_datapath
 
@@ -142,6 +145,14 @@ obj/%.o: processing/modules/pcap/%.c
 	@echo ' '
 
 obj/%.o: processing/modules/dns/%.c
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C Compiler'
+	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
+		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -lpcap -o"$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+obj/%.o: processing/modules/http/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
 	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \

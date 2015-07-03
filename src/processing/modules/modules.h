@@ -8,6 +8,7 @@
 #include "print/print.h"
 #include "pcap/pcap.h"
 #include "dns/dns.h"
+#include "http/http.h"
 
 //
 TQueueCallback SelectModule(char* name);

@@ -1,5 +1,7 @@
 #include "parsers.h"
 
+// TODO: *16 -> *16*16
+
 void parse_l2_header(uint8_t* packet, l2_header* header)
 {
     header->dsthw[0] = packet[0];
@@ -50,6 +52,19 @@ void parse_l4_udp_header(uint8_t* packet, udp_header* header)
     header->length = packet[offset + 4]*16 + packet[offset + 5];
 
     header->checksum = packet[offset + 6]*16 + packet[offset + 7];
+}
+
+void parse_l4_tcp_header(uint8_t* packet, tcp_header* header)
+{
+    int offset = L2_HEADER_LENGTH + L3_HEADER_LENGTH;
+
+    header->source_port = packet[offset + 0]*16*16 + packet[offset + 1];
+
+    header->destination_port = packet[offset + 2]*16*16 + packet[offset + 3];
+
+    header->data_offset = packet[offset + 12] >> 4;
+
+    // TODO: rest of fields
 }
 
 void parse_dns_message(uint8_t* packet, uint32_t packet_length, dns_message* message)

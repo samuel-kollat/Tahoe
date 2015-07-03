@@ -26,6 +26,11 @@ void parse_l4_udp_header(
     udp_header* header
 );
 
+void parse_l4_tcp_header(
+    uint8_t* packet,
+    tcp_header* header
+);
+
 void parse_dns_message(
     uint8_t* packet,
     uint32_t packet_length,
