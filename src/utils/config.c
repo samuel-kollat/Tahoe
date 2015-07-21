@@ -93,6 +93,10 @@ TConfig* parse_config(char* config_filename)
 			{
 				string_cpy(&(config->database->schema), right);
 			}
+			else if(strcmp(left,"results")==0)
+			{
+				string_cpy(&(config->database->results), right);
+			}
 		}
 		// [APPLICATION]
 		else if(state==2)

@@ -27,6 +27,7 @@
 #include "../../protocols/parsers.h"
 #include "dns_resolutions.h"
 #include "../../storing.h"
+#include "../../../database/mysql/analyzers/dns_mysql.h"
 
 void AnalyzeDns(
     TQueueItem* start,

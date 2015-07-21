@@ -88,8 +88,11 @@ void DnsStore()
     TResolutionItem* item = NULL;
     while((item = GetNextProcessedItem(prev_item)) != NULL)
     {
-        printf("[Thread] Data Stored.\n");
-        SetItemAsSaved(item);
+        if(mysql_save_dns_data(item))
+        {
+            SetItemAsSaved(item);
+        }
+
         prev_item = item;
     }
 

@@ -16,6 +16,7 @@ typedef struct dbinfo {
 	char* username;
 	char* password;
 	char* schema;
+	char* results;
 } TConfigDbInfo;
 
 
