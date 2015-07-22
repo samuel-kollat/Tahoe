@@ -26,8 +26,17 @@ void action_add(    onep_policy_entry_op_t *entry_op,   // Entry operation
             goto cleanup;
         }
     }
+    else if (action == ONEP_DPSS_ACTION_DIVERT) {
+        printf ("Adding ONEP DPSS Action Copy\n");
+        rc = onep_policy_action_add_divert(ah, callback, NULL, &dp_action);
+        if(rc != ONEP_OK) {
+            fprintf(stderr, "\nError in onep_policy_action_add_divert: %d, %s\n",
+                rc, onep_strerror(rc));
+            goto cleanup;
+        }
+    }
     else {
-       printf ("TODO: Other than ONEP DPSS Action Copy\n");
+       printf ("TODO: Other than ONEP DPSS Action Copy and Divert\n");
        goto cleanup;
     }
 

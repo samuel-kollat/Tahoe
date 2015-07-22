@@ -20,6 +20,10 @@ TQueueCallback SelectModule(char* name)
     {
         callback = AnalyzeHttp;
     }
+    else if(strcmp(name, "dhcp") == 0)
+    {
+        callback = AnalyzeDhcp;
+    }
     //else if() ...
     else
     {
@@ -41,6 +45,10 @@ TStoreDataReadyCallback SelectStoreReady(char* name)
     else if(strcmp(name, "http") == 0)
     {
         callback = HttpDataReady;
+    }
+    else if(strcmp(name, "dhcp") == 0)
+    {
+        callback = DhcpDataReady;
     }
     //else if() ...
     else
@@ -64,6 +72,10 @@ TStorePrepareDataCallback SelectStorePrepare(char* name)
     {
         callback = HttpDataPrepare;
     }
+    else if(strcmp(name, "dhcp") == 0)
+    {
+        callback = DhcpDataPrepare;
+    }
     //else if() ...
     else
     {
@@ -86,6 +98,10 @@ TStoreConditionCallback SelectStoreCondition(char* name)
     {
         callback = HttpDataCondition;
     }
+    else if(strcmp(name, "dhcp") == 0)
+    {
+        callback = DhcpDataCondition;
+    }
     //else if() ...
     else
     {
@@ -107,6 +123,10 @@ TStoreCallback SelectStoreModule(char* name)
     else if(strcmp(name, "http") == 0)
     {
         callback = HttpStore;
+    }
+    else if(strcmp(name, "dhcp") == 0)
+    {
+        callback = DhcpStore;
     }
     //else if() ...
     else
