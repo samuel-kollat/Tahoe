@@ -524,6 +524,9 @@ TApiStatus GenerateALC(TNetworkElement* element,
     {
         int src_mask = 0;
         int dst_mask = 0;
+        char* src_ip = data->src_ip;
+        char* dst_ip = data->dst_ip;
+
         if(data->src_mask != NONDEF )
         {
             src_mask = data->src_mask;
@@ -533,7 +536,19 @@ TApiStatus GenerateALC(TNetworkElement* element,
             dst_mask = data->dst_mask;
         }
 
-        ace_add_ip(ace, data->src_ip, src_mask, data->dst_ip, dst_mask);
+        if(strcmp(data->src_ip, "0.0.0.0") == 0)
+        {
+            src_ip = NULL;
+            src_mask = 0;
+        }
+        if(strcmp(data->dst_ip, "0.0.0.0") == 0)
+        {
+            dst_ip = NULL;
+            dst_mask = 0;
+        }
+
+
+        ace_add_ip(ace, src_ip, src_mask, dst_ip, dst_mask);
         empty = false;
     }
     else

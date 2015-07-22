@@ -85,13 +85,19 @@ int main (int argc, char* argv[]) {
       if(facl->ip_source!=NULL)
       {
         s = AddIPv4ToFilter(filter, SRC, facl->ip_source->address, facl->ip_source->mask);
-        printf("    -- added SRC IP to filter: %s\n", facl->ip_source->address);
+        if(strcmp(facl->ip_source->address, "0.0.0.0") == 0)
+          printf("    -- added SRC IP to filter: ANY\n");
+        else
+          printf("    -- added SRC IP to filter: %s\n", facl->ip_source->address);
       }
       /* DESTINATION IP ADDRESS */
       if(facl->ip_destination!=NULL)
       {
         s = AddIPv4ToFilter(filter, DST, facl->ip_destination->address, facl->ip_destination->mask);
-        printf("    -- added DST IP to filter: %s\n", facl->ip_destination->address);
+        if(strcmp(facl->ip_destination->address, "0.0.0.0") == 0)
+          printf("    -- added DST IP to filter: ANY\n");
+        else
+          printf("    -- added DST IP to filter: %s\n", facl->ip_destination->address);
       }
 
       /* SOURCE PORTS */
