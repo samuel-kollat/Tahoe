@@ -4,12 +4,14 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "l2.h"
 #include "l3.h"
 #include "l4.h"
 
 #include "dns.h"
+#include "dhcp.h"
 
 void parse_l2_header(
     uint8_t* packet,
@@ -35,6 +37,12 @@ void parse_dns_message(
     uint8_t* packet,
     uint32_t packet_length,
     dns_message* message
+);
+
+void parse_dhcp_message(
+    uint8_t* packet,
+    uint32_t packet_length,
+    dhcp_message* message
 );
 
 void ip_to_str(
