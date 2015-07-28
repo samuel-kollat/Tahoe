@@ -59,4 +59,9 @@ uint16_t dns_fqdn_length(
     uint8_t* data
 );
 
+uint16_t ipv4_checksum(
+    uint8_t* buf,
+    unsigned size
+);
+
 #endif

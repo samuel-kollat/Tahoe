@@ -8,6 +8,9 @@
 #define MINIMAL_DHCP_PACKET_SIZE 239
 #define REQUEST_LIST_SIZE 20
 
+#define BOOT_REQUEST 1
+#define BOOT_REPLY 2
+
 typedef enum {
     DHCPDISCOVER = 1,
     DHCPOFFER,
@@ -41,6 +44,7 @@ typedef enum {
 
 typedef struct
 {
+    uint32_t dhcp_message_type_l2_offset;
     TDhcpMessageType dhcp_message_type;
     char* host_name;
     TDhcpOptions parameter_request_list[REQUEST_LIST_SIZE];

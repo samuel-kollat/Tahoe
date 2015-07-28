@@ -395,6 +395,7 @@ void parse_dhcp_message(uint8_t* packet,
 
             if(option_code == DHCP_MESSAGE_TYPE && option_len == 1)
             {
+                message->options.dhcp_message_type_l2_offset = option_offset + 2;
                 message->options.dhcp_message_type = packet[option_offset + 2];
             }
             else if(option_code == HOST_NAME && option_len > 1)
@@ -427,4 +428,30 @@ void parse_dhcp_message(uint8_t* packet,
 
     message->valid = true;
     return;
+}
+
+uint16_t ipv4_checksum(uint8_t* buf, unsigned size)
+{
+    unsigned sum = 0;
+    int i;
+
+    /* Accumulate checksum */
+    for (i = 0; i < size - 1; i += 2)
+    {
+        uint16_t word16 = *(uint16_t*) &buf[i];
+        sum += word16;
+    }
+
+    /* Handle odd-sized case */
+    if (size & 1)
+    {
+        uint16_t word16 = (uint8_t) buf[i];
+        sum += word16;
+    }
+
+    /* Fold to get the ones-complement result */
+    while (sum >> 16) sum = (sum & 0xFFFF)+(sum >> 16);
+
+    /* Invert to get the negative in ones-complement arithmetic */
+    return ~sum;
 }

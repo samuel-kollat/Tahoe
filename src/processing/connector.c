@@ -2,6 +2,7 @@
 
 TQueueCallback Proc_callback = NULL;
 TQueueCallbackArgs Proc_callback_args = NULL;
+onep_network_element_t* network_element = NULL;
 
 void PrintMeErrorMessage(char* dst, char* msg)
 {
@@ -67,4 +68,16 @@ void* processing(void *arg)
     Proc_callback(start, stop, Proc_callback_args);
   }
 
+}
+
+TMeStatus RegisterNetworkElement(onep_network_element_t* ne)
+{
+  network_element = ne;
+
+  return ME_OK;
+}
+
+onep_network_element_t* GetNetworkElement()
+{
+  return network_element;
 }

@@ -31,6 +31,9 @@ TMeStatus RegisterQueueCallback(TQueueCallback callback);
 // Register arguments for selected callback function
 TMeStatus RegisterQueueCallbackArgs(char* args);
 
+TMeStatus RegisterNetworkElement(onep_network_element_t* ne);
+onep_network_element_t* GetNetworkElement();
+
 // Print error
 void PrintMeErrorMessage(char* dst, char* msg);
 
@@ -38,5 +41,6 @@ void* processing(void *);
 
 extern TQueueCallback Proc_callback;
 extern TQueueCallbackArgs Proc_callback_args;
+extern onep_network_element_t* network_element;
 
 #endif

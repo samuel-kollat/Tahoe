@@ -26,6 +26,7 @@
 #include "../../../queues/queues.h"
 #include "../../protocols/parsers.h"
 #include "../../storing.h"
+#include "../../connector.h"
 
 void AnalyzeDhcp(
     TQueueItem* start,
@@ -34,7 +35,7 @@ void AnalyzeDhcp(
 );
 
 void DhcpAnalyze(
-    TPacket* item
+    TPacket* packet
 );
 
 bool DhcpDataReady(
@@ -47,6 +48,10 @@ void DhcpDataCondition(
 );
 
 void DhcpStore(
+);
+
+void DhcpPrint(
+    dhcp_message* message
 );
 
 #endif
