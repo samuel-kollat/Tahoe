@@ -1,3 +1,11 @@
+/* * * * * * * * * * * * * * * * * * * * *
+ *              O n e M o n              *
+ *                                       *
+ * File: db_mysql.c                      *
+ *                                       *
+ * * * * * * * * * * * * * * * * * * * * */
+
+
 #include "db_mysql.h"
 #include "../../utils/config.h";
 

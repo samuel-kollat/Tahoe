@@ -1,8 +1,5 @@
 #------------------------------------------------------------------
-# Makefile - Make rules for onePK sample applications
-#
-# Copyright (c) 2011-2013 by Cisco Systems, Inc.
-# All rights reserved.
+# OneMon
 #------------------------------------------------------------------
 
 ifeq ($(origin ONEP_SDK), undefined)

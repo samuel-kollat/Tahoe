@@ -1,8 +1,5 @@
 #------------------------------------------------------------------
-# Makefile - Make rules for ONE-P Sample applications
-#
-# Copyright (c) 2011-2012 by cisco Systems, Inc.
-# All rights reserved.
+# OneMon
 #------------------------------------------------------------------
 include Makefile.defs
 

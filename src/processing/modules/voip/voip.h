@@ -1,3 +1,11 @@
+/* * * * * * * * * * * * * * * * * * * * *
+ *              O n e M o n              *
+ *                                       *
+ * File: voip.h                          *
+ * Author: David Antolik                 *
+ *                                       *
+ * * * * * * * * * * * * * * * * * * * * */
+
 #ifndef __VOIP_H__
 #define __VOIP_H__
 
@@ -106,6 +114,10 @@ typedef enum {
 	SIP_REPLY_DIALOG_ESTABLISHEMENT,
 	SIP_REPLY_REQUEST_CANCELLED,
 	SIP_REPLY_DECLINE,
+
+	SIP_REPLY_400,
+	SIP_REPLY_500,
+	SIP_REPLY_486,
 } Sip_Method;
 
 char * print_sip_method(Sip_Method sip_method);
@@ -113,5 +125,11 @@ char * print_sip_method(Sip_Method sip_method);
 char * print_sip_call_state(CallState call_state);
 
 void print_hex(uint8_t *mem, int length);
+
+void dump_sip_calls(TList *);
+
+void *info_thread(void *);
+
+uint32_t ip_str_to_uint32(char *);
 
 #endif
