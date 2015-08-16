@@ -10,6 +10,8 @@
 #include "dns/dns.h"
 #include "http/http.h"
 #include "dhcp/dhcp.h"
+#include "voip/voip.h"
+
 
 //
 TQueueCallback SelectModule(char* name);

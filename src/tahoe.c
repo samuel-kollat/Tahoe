@@ -1,6 +1,6 @@
 /*
  *-----------------------------------------------------------------
- * Nevada - Tahoe
+ * OneMon
  *-----------------------------------------------------------------
  */
 
@@ -189,6 +189,10 @@ int main (int argc, char* argv[]) {
       {
         s = AddL7ProtocolToFilter(filter, RTCP);
       }
+      else if(strcmp(l7_protocol, "SIP")==0)
+      {
+        s = AddL7ProtocolToFilter(filter, SIP);
+      }
       else {
         printf("    -- UNKNOWN L7 protocol %s\n", l7_protocol);
       }
@@ -202,6 +206,7 @@ int main (int argc, char* argv[]) {
   // if there are no filters for the application
   if(application->filter==NULL)
   {
+    printf("    -- application->filter IS NULL\n");
     // Create new filter
     TFilterData* filter;
     s = GetEmptyFilter(&filter);
@@ -308,7 +313,6 @@ int main (int argc, char* argv[]) {
     }
   }
 
-   printf("\nDone. Goodbye!");
    printf("\n\n******* DISCONNECT AND CLEAN UP *******\n\n");
 
    /////////////////////
@@ -316,177 +320,7 @@ int main (int argc, char* argv[]) {
    //   Refactoring
    /////////////////////
 
-   /*Remove the policies applied to network element */
-
-   /*
-   if(target_op_list) {
-           rc = onep_policy_op_list_destroy(&target_op_list);
-           if (ONEP_OK != rc) {
-                fprintf(stderr, "\nError in destroying target op list : %d, %s", rc, onep_strerror(rc));
-                goto cleanup;
-           }
-    }
-
-    rc = onep_policy_target_op_list_new(&target_op_list);
-       if(rc != ONEP_OK) {
-            fprintf(stderr, "\nError in creating target op list : %d, %s", rc, onep_strerror(rc));
-            goto cleanup;
-    }
-
-    //deactivate target
-    rc = onep_policy_target_op_deactivate(target_op_list, &target_op);
-    if(rc != ONEP_OK) {
-          fprintf(stderr, "\nError in deactivating target op : %d, %s", rc, onep_strerror(rc));
-          goto cleanup;
-    }
-
-    rc = onep_policy_target_op_set_direction(target_op, ONEP_DIRECTION_IN);
-    if(rc != ONEP_OK) {
-           fprintf(stderr, "\nError in onep_policy_target_op_set_direction: %d, %s",
-                 rc, onep_strerror(rc));
-           goto cleanup;
-    }
-
-    //add interface group to the target
-    rc = onep_policy_target_op_add_interface(target_op, intf);
-    if(rc != ONEP_OK) {
-          fprintf(stderr, "\nError in adding interface to target : %d, %s", rc, onep_strerror(rc));
-          goto cleanup;
-    }
-
-    rc = onep_policy_target_op_add_pmap(target_op, pmap_handle);
-    if(rc != ONEP_OK) {
-          fprintf(stderr, "\nError in adding pmap handle to target : %d, %s", rc, onep_strerror(rc));
-          goto cleanup;
-    }
-
-    rc = onep_policy_op_add_network_element(target_op_list, ne);
-    if(rc != ONEP_OK) {
-         fprintf(stderr, "\nError in sending target op list to network element : %d, %s", rc, onep_strerror(rc));
-
-    }
-
-    rc = onep_policy_op_update(target_op_list);
-    if(rc != ONEP_OK) {
-         fprintf(stderr, "\nError in updating target op list : %d, %s", rc, onep_strerror(rc));
-
-    }
-	 // removing policy map
-	 if(pmap_op_list) {
-		 rc = onep_policy_op_list_destroy(&pmap_op_list);
-		 if (ONEP_OK != rc) {
-			 fprintf(stderr, "\nError in destroying pmap Op List : %d, %s", rc, onep_strerror(rc));
-		 }
-	 }
-
-	 rc = onep_policy_pmap_op_list_new(&pmap_op_list);
-	 if(rc != ONEP_OK) {
-		 fprintf(stderr, "\nError in getting Network Application : %d, %s", rc, onep_strerror(rc));
-	 }
-
-	 rc = onep_policy_pmap_op_delete(pmap_op_list, pmap_handle, &pmap_op);
-	 if(rc != ONEP_OK) {
-		fprintf(stderr, "\nError in deleting pmap : %d, %s", rc, onep_strerror(rc));
-
-	 }
-
-	 rc = onep_policy_op_add_network_element(pmap_op_list, ne);
-	 if(rc != ONEP_OK) {
-		 fprintf(stderr, "\nError in sending pmap op list to network element : %d, %s", rc, onep_strerror(rc));
-
-	 }
-
-	 rc = onep_policy_op_update(pmap_op_list);
-	 if(rc != ONEP_OK) {
-		 fprintf(stderr, "\nError in updating pmap op list : %d, %s", rc, onep_strerror(rc));
-
-	 }
-	 //Removing class map
-	 if(cmap_op_list) {
-		 rc = onep_policy_op_list_destroy(&cmap_op_list);
-		 if (ONEP_OK != rc) {
-			fprintf(stderr, "\nError in destroying cmap Op List : %d, %s", rc, onep_strerror(rc));
-		 }
-	 }
-
-	 rc = onep_policy_cmap_op_list_new(&cmap_op_list);
-	 if(rc != ONEP_OK) {
-		 fprintf(stderr, "\nError in getting cmap op list : %d, %s", rc, onep_strerror(rc));
-
-	 }
-
-	 rc = onep_policy_cmap_op_delete(cmap_op_list, cmap_handle, &cmap_op);
-	 if(rc != ONEP_OK) {
-		 fprintf(stderr, "\nError in deleting cmap : %d, %s", rc, onep_strerror(rc));
-
-	 }
-
-	 rc = onep_policy_op_add_network_element(cmap_op_list, ne);
-	 if(rc != ONEP_OK) {
-		 fprintf(stderr, "\nError in sending op list to network element : %d, %s", rc, onep_strerror(rc));
-
-	 }
-
-	 rc = onep_policy_op_update(cmap_op_list);
-	 if(rc != ONEP_OK) {
-		 fprintf(stderr, "\nError in updating cmap op list : %d, %s", rc, onep_strerror(rc));
-
-	 }
-
-   cleanup:
-
-      if(target_op_list) {
-    	  destroy_rc = onep_policy_op_list_destroy(&target_op_list);
-          if(destroy_rc != ONEP_OK) {
-        	  fprintf(stderr, "\nError in onep_policy_op_list_destroy: %d, %s",
-              destroy_rc, onep_strerror(destroy_rc));
-          }
-      }
-
-      if(acl) {
-         destroy_rc = onep_acl_delete_acl(&acl);
-         if(destroy_rc != ONEP_OK) {
-            fprintf(stderr, "\nError in onep_acl_delete_acl: %d, %s",
-                destroy_rc, onep_strerror(destroy_rc));
-         }
-      }
-      if(global_cap) {
-         destroy_rc = onep_policy_global_cap_destroy(&global_cap);
-         if(destroy_rc != ONEP_OK) {
-            fprintf(stderr, "\nError in onep_policy_global_cap_destroy: %d, %s",
-                destroy_rc, onep_strerror(destroy_rc));
-         }
-      }
-      if(filter_cap) {
-         destroy_rc = onep_policy_cap_filter_destroy(&filter_cap);
-         if(destroy_rc != ONEP_OK) {
-            fprintf(stderr, "\nError in onep_policy_cap_filter_destroy: %d, %s",
-               destroy_rc, onep_strerror(destroy_rc));
-         }
-      }
-      if(tables) {
-         destroy_rc = onep_collection_destroy(&tables);
-         if(destroy_rc != ONEP_OK) {
-            fprintf(stderr, "\nError in destroy tables : %d, %s",
-               destroy_rc, onep_strerror(destroy_rc));
-         }
-      }
-      if(intfs) {
-         destroy_rc = onep_collection_destroy(&intfs);
-         if(destroy_rc != ONEP_OK) {
-             fprintf(stderr, "\nError in destroy intfs : %d, %s",
-                 destroy_rc, onep_strerror(destroy_rc));
-         }
-      }
-      if(intf_filter) {
-         destroy_rc = onep_interface_filter_destroy(&intf_filter);
-         if(destroy_rc != ONEP_OK) {
-             fprintf(stderr, "\nError in destroy intf_filter : %d, %s",
-                 destroy_rc, onep_strerror(destroy_rc));
-         }
-      }
-
-    */
+   /*Remove the policies applied to network element */   
 
    return rc;
 }

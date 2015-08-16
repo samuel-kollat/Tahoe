@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-// All types of queues
+// All types of queues - the best enum ever ! :P
 typedef enum {
     ONLINE     // Share structures stored in RAM
 } TQueueType;

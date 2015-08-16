@@ -5,12 +5,14 @@ pcap_dumper_t* pcap_dumpfile = NULL;
 
 typedef struct pcap_pkthdr pcap_pkthdr_t;
 
+
 void Pcap(TQueueItem* start, TQueueItem* stop, TQueueCallbackArgs args)
 {
 	char* pcap_filename = get_config_value("pcap_filename");
 	if(pcap_filename==NULL)
 		return;
 	open_pcap(pcap_filename);
+
 	TQueueItem* item = start;
 
     while(item != NULL)
@@ -19,22 +21,19 @@ void Pcap(TQueueItem* start, TQueueItem* stop, TQueueCallbackArgs args)
 
         uint8_t* packet_l2_start;
         uint32_t packet_l2_length;
+
         onep_dpss_pkt_get_l2_start((onep_dpss_paktype_t*)packet, &packet_l2_start, &packet_l2_length);
 
-        /*
-        struct pcap_pkthdr {
-	        struct timeval ts;      // time stamp
-	        bpf_u_int32 caplen;     // length of portion present
-	        bpf_u_int32 len;        // length this packet (off wire)
-		};
-		*/
 
 		pcap_pkthdr_t x = {{(uint32_t)item->timestamp.tv_sec, (uint32_t)item->timestamp.tv_nsec / 1000}, packet_l2_length, packet_l2_length};
 
-		pcap_dump((u_char*)pcap_dumpfile, &x, packet_l2_start);
+
+		pcap_dump((u_char*)pcap_dumpfile, &x, packet_l2_start);		
 
         item = GetNextItem(item, stop);
     }
+    pcap_dump_flush(pcap_dumpfile);
+
 }
 
 void open_pcap(char* filename)

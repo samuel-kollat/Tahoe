@@ -1,8 +1,5 @@
 #------------------------------------------------------------------
-# Makefile - Make rules for ONE-P Sample applications
-#
-# Copyright (c) 2011-2012 by cisco Systems, Inc.
-# All rights reserved.
+# OneMon
 #------------------------------------------------------------------
 include Makefile.defs
 
@@ -30,13 +27,15 @@ OBJSNETAPP += \
 	obj/modules.o \
 	obj/storing.o \
 	obj/parsers.o \
-	obj/queues.o \
-	obj/pcap.o \
 	obj/dns.o \
 	obj/dns_resolutions.o \
 	obj/http.o \
 	obj/http_statistics.o \
-	obj/dhcp.o
+	obj/dhcp.o \
+	obj/queues.o \
+	obj/pcap.o \
+	obj/voip.o \
+	obj/sip_calls.o
 
 LD_LIBS += -lonep${ONEP_LBITS}_datapath
 
@@ -168,11 +167,19 @@ obj/%.o: processing/modules/http/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
 	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
-		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -lpcap -o"$@" "$<"
+		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -lpcap -o"$@" "$<" `mysql_config --cflags --libs`
 	@echo 'Finished building: $<'
 	@echo ' '
 
 obj/%.o: processing/modules/dhcp/%.c
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C Compiler'
+	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \
+		-MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -lpcap -o"$@" "$<" `mysql_config --cflags --libs`
+	@echo 'Finished building: $<'
+	@echo ' '
+
+obj/%.o: processing/modules/voip/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
 	$(CC) $(CC_INCDIRS) $(CC_BLDFLAGS) -MMD -MP \

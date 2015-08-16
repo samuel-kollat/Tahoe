@@ -127,6 +127,11 @@ TStoreCallback SelectStoreModule(char* name)
     else if(strcmp(name, "dhcp") == 0)
     {
         callback = DhcpStore;
+    } 
+    else if(strcmp(name, "voip") == 0)
+    {
+        callback = Voip;
+
     }
     //else if() ...
     else
