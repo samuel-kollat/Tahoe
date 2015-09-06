@@ -41,15 +41,15 @@ TMApplication* get_application_mysql(int application_id)
 	
 	char query_buffer[QUERY_BUFFER_SIZE];
 	sprintf(query_buffer, " \
-		SELECT application.id, application.name, application.certificate_id, application.analyzer_id, \
-			   analyzer.name, analyzer.description, analyzer.src, \
-			   certificate.name, certificate.root_cert_path, analyzer.args \
-			FROM application \
-		LEFT JOIN certificate \
-			ON certificate.id = application.certificate_id \
-		LEFT JOIN analyzer \
-			ON analyzer.id = application.analyzer_id \
-		WHERE application.id='%d' \
+		SELECT Applications.id, Applications.name, Applications.certificate_id, Applications.analyzer_id, \
+			   Analyzers.name, Analyzers.description, Analyzers.src, \
+			   Certificates.name, Certificates.root_cert_path, Analyzers.args \
+			FROM Applications \
+		LEFT JOIN Certificates \
+			ON Certificates.id = Applications.certificate_id \
+		LEFT JOIN Analyzers \
+			ON Analyzers.id = Applications.analyzer_id \
+		WHERE Applications.id='%d' \
 		LIMIT 1;", application_id);
 	mysql_query(con, query_buffer);
 
@@ -95,9 +95,9 @@ TMApplication* get_application_mysql(int application_id)
 	mysql_query(con, query_buffer);
 
 	result = mysql_store_result(con);
-	//printf("num-rows: %d\n", mysql_num_rows(result));
 
 	application->config = NULL;
+
 	if(mysql_num_rows(result)>0)
 	{
 		MYSQL_ROW row;
@@ -128,7 +128,6 @@ TMApplication* get_application_mysql(int application_id)
 
 	}
 
-
 	return (TMApplication*) application;
 	
 	//return NULL;
@@ -150,14 +149,15 @@ TMFilter* get_application_filters(int application_id)
 
 	char query_buffer[QUERY_BUFFER_SIZE];
 	sprintf(query_buffer, " \
-		SELECT filter.id, filter.name \
-		FROM filter \
-		WHERE filter.application_id='%d'; \
+		SELECT Filters.id, Filters.name \
+		FROM Filters \
+		WHERE Filters.application_id='%d'; \
 		", application_id);
 	mysql_query(con, query_buffer);
 	MYSQL_RES* result = mysql_store_result(con);
 	//printf("num-rows: %d\n", mysql_num_rows(result));
 
+	//printf("%d\n", mysql_num_rows(result));
 	if(mysql_num_rows(result)==0)
 		return NULL;	
 
@@ -184,6 +184,7 @@ TMFilter* get_application_filters(int application_id)
 
 	}
 	mysql_free_result(result);
+
 	return (TMFilter*)return_filter;
 }
 
@@ -198,21 +199,21 @@ TMAccess_list* get_filter_access_lists(int filter_id)
 	char query_buffer[QUERY_BUFFER_SIZE];
 
 	sprintf(query_buffer, " \
-		SELECT access_list.id, access_list.action, access_list.protocol, \
+		SELECT AccessLists.id, AccessLists.action, AccessLists.protocol, \
 		SRC.address as src_address, SRC.mask as src_mask,\
 		DST.address as dst_address, DST.mask as dst_mask, \
 		PNS.greater_or_equal, PNS.less_or_equal, \
 		PND.greater_or_equal, PND.less_or_equal \
-		FROM access_list \
-		LEFT JOIN ip_network SRC \
-			ON access_list.ip_source = SRC.id \
-		LEFT JOIN ip_network DST \
-			ON access_list.ip_destination = DST.id \
-		LEFT JOIN ports PNS \
-			ON access_list.pn_source = PNS.id \
-		LEFT JOIN ports PND \
-			ON access_list.pn_destination = PND.id \
-		WHERE access_list.filter_id='%d'; \
+		FROM AccessLists \
+		LEFT JOIN IpNetworks SRC \
+			ON AccessLists.ip_source = SRC.id \
+		LEFT JOIN IpNetworks DST \
+			ON AccessLists.ip_destination = DST.id \
+		LEFT JOIN Ports PNS \
+			ON AccessLists.pn_source = PNS.id \
+		LEFT JOIN Ports PND \
+			ON AccessLists.pn_destination = PND.id \
+		WHERE AccessLists.filter_id='%d'; \
 		", filter_id);
 
 	mysql_query(con, query_buffer);
@@ -308,11 +309,11 @@ TMNbar_protocol* get_filter_nbar_protocols(int filter_id)
 	char query_buffer[QUERY_BUFFER_SIZE];
 
 	sprintf(query_buffer, " \
-		SELECT nbar_protocol.id, nbar_protocol.protocol_name, nbar_protocol.protocol_description, \
-		nbar_protocol.protocol_id \
-		FROM nbar_protocol \
-		INNER JOIN filter_has_nbar_protocol ON filter_has_nbar_protocol.filter_id = '%d' \
-		AND filter_has_nbar_protocol.nbar_protocol_id = nbar_protocol.id; \
+		SELECT NbarProtocols.id, NbarProtocols.protocol_name, NbarProtocols.protocol_description, \
+		NbarProtocols.protocol_id \
+		FROM NbarProtocols \
+		INNER JOIN FilterHasNbarProtocols ON FilterHasNbarProtocols.filter_id = '%d' \
+		AND FilterHasNbarProtocols.nbar_protocol_id = NbarProtocols.id; \
 		", filter_id);
 
 	mysql_query(con, query_buffer);
@@ -366,9 +367,9 @@ TMRouter* get_application_routers(int application_id)
 	char query_buffer[QUERY_BUFFER_SIZE];
 
 	sprintf(query_buffer, " \
-		SELECT router.id, router.management_ip, router.name, router.username, router.password, router.interfaces \
-		FROM router \
-		WHERE router.application_id='%d'; \
+		SELECT Routers.id, Routers.management_ip, Routers.name, Routers.username, Routers.password, Routers.interfaces \
+		FROM Routers \
+		WHERE Routers.application_id='%d'; \
 		", application_id);
 
 	mysql_query(con, query_buffer);
