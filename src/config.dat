@@ -1,0 +1,9 @@
+[DATABASE]
+type=mysql
+hostname=codepage.eu
+username=sec6net
+password=zW7fE7DjySPEjQAQ
+schema=tahoe
+results=colorado
+[APPLICATION]
+id=1

@@ -3,6 +3,5 @@ obj/
 *.pcap
 *.*~
 tutorial.properties
-config.dat
 *.o
 config-onepk
