@@ -319,3 +319,139 @@ void domain_to_str(uint8_t* domain, char** str)
     }
     (*str)[i] = '\0';
 }
+
+void parse_dhcp_message(uint8_t* packet,
+    uint32_t packet_length,
+    dhcp_message* message)
+{
+    message->valid = false;
+    message->options.parameter_request_list[0] = PAD;
+
+    if(packet_length < MINIMAL_DHCP_PACKET_SIZE)
+    {
+        return;
+    }
+
+    int offset = L2_HEADER_LENGTH + L3_HEADER_LENGTH + UDP_HEADER_LENGTH;
+
+    message->op = packet[offset + 0];
+    message->htype = packet[offset + 1];
+    message->hlen = packet[offset + 2];
+    message->hops = packet[offset + 3];
+    message->xid = packet[offset + 4]*256*256*256 + packet[offset + 5]*256*256 +packet[offset + 6]*256 +packet[offset + 7];
+    message->secs = packet[offset + 8]*256 + packet[offset + 9];
+
+    message->flags[0] = packet[offset + 10];
+    message->flags[1] = packet[offset + 11];
+
+    message->ciaddr[0] = packet[offset + 12];
+    message->ciaddr[1] = packet[offset + 13];
+    message->ciaddr[2] = packet[offset + 14];
+    message->ciaddr[3] = packet[offset + 15];
+
+    message->yiaddr[0] = packet[offset + 16];
+    message->yiaddr[1] = packet[offset + 17];
+    message->yiaddr[2] = packet[offset + 18];
+    message->yiaddr[3] = packet[offset + 19];
+
+    message->siaddr[0] = packet[offset + 20];
+    message->siaddr[1] = packet[offset + 21];
+    message->siaddr[2] = packet[offset + 22];
+    message->siaddr[3] = packet[offset + 23];
+
+    message->giaddr[0] = packet[offset + 24];
+    message->giaddr[1] = packet[offset + 25];
+    message->giaddr[2] = packet[offset + 26];
+    message->giaddr[3] = packet[offset + 27];
+
+    int i;
+    for(i = 0; i < 16; i++)
+    {
+        message->chaddr[i] = packet[offset + 28 + i];
+    }
+
+    for(i = 0; i < 64; i++)
+    {
+        message->sname[i] = packet[offset + 44 + i];
+        if(message->sname[i] == 0)
+        {
+            break;
+        }
+    }
+
+    // 44 + 64 = 108 + 128 (file) = 236
+    message->magic_cookie[0] = packet[offset + 236];
+    message->magic_cookie[1] = packet[offset + 237];
+    message->magic_cookie[2] = packet[offset + 238];
+    message->magic_cookie[3] = packet[offset + 239];
+
+    if(packet_length > offset + MINIMAL_DHCP_PACKET_SIZE)
+    {
+        int option_offset = offset + MINIMAL_DHCP_PACKET_SIZE + 1;
+        while(option_offset < packet_length)
+        {
+            int option_code = packet[option_offset + 0];
+            int option_len = packet[option_offset + 1];
+
+            if(option_code == DHCP_MESSAGE_TYPE && option_len == 1)
+            {
+                message->options.dhcp_message_type_l2_offset = option_offset + 2;
+                message->options.dhcp_message_type = packet[option_offset + 2];
+            }
+            else if(option_code == HOST_NAME && option_len > 1)
+            {
+                message->options.host_name = (char*) malloc ((option_len+1) * sizeof(char));
+                if(message->options.host_name == NULL)
+                {
+                    fprintf(stderr, "[Error] malloc (parse_dhcp_message)\n");
+                    return;
+                }
+                for(i = 0; i < option_len; i++)
+                {
+                    message->options.host_name[i] = packet[option_offset + 2 + i];
+                }
+                message->options.host_name[option_len] = '\0';
+            }
+            else if(option_code == PARAMETER_REQUEST_LIST && option_len > 1)
+            {
+                printf("LOL\n");
+                for(i = 0; i < option_len; i++)
+                {
+                    message->options.parameter_request_list[i] = packet[option_offset + 2 + i];
+                }
+                message->options.parameter_request_list[option_len] = PAD;
+            }
+
+            option_offset = option_offset + 1 + 1 + option_len;
+        }
+    }
+
+    message->valid = true;
+    return;
+}
+
+uint16_t ipv4_checksum(uint8_t* buf, unsigned size)
+{
+    unsigned sum = 0;
+    int i;
+
+    /* Accumulate checksum */
+    for (i = 0; i < size - 1; i += 2)
+    {
+        uint16_t word16 = *(uint16_t*) &buf[i];
+        sum += word16;
+    }
+
+    /* Handle odd-sized case */
+    if (size & 1)
+    {
+        uint16_t word16 = (uint8_t) buf[i];
+        sum += word16;
+    }
+
+    /* Fold to get the ones-complement result */
+    while (sum >> 16) sum = (sum & 0xFFFF)+(sum >> 16);
+
+    /* Invert to get the negative in ones-complement arithmetic */
+    return ~sum;
+}

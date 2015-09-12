@@ -222,11 +222,11 @@ int main (int argc, char* argv[]) {
   s = SetCallbackToFilters(callback);
 
   // Initialize all network elements - routers
+  TNetworkElement* element;
   TMRouter* router = application->router;
   while(router!=NULL)
   {
     printf("  -- configuring router %s - %s\n", router->name, router->interfaces);
-    TNetworkElement* element;
     char app_name[32];
     sprintf(app_name, "com.tahoe.application.%d", application->id);
     s = InitializeNetworkElement(
@@ -269,6 +269,7 @@ int main (int argc, char* argv[]) {
   me_s = SetTypeOfQueue(ONLINE, 1, &Packet_queue);
   me_s = RegisterQueueCallback(SelectModule(application->analyzer->src));
   me_s = RegisterQueueCallbackArgs(application->analyzer->args);
+  me_s = RegisterNetworkElement(element->ne);
 
   // Middlend Thread
   pthread_t proc_thread;
