@@ -465,7 +465,8 @@ TApiStatus GenerateFilters(TNetworkElement* element)
         // Add action
         action_add(
             entry_op,
-            ONEP_DPSS_ACTION_DIVERT,
+            //ONEP_DPSS_ACTION_DIVERT,
+            ONEP_DPSS_ACTION_COPY,
             FilterList.callback
         );
 

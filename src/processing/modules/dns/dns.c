@@ -17,6 +17,8 @@ void AnalyzeDns(TQueueItem* start, TQueueItem* stop, TQueueCallbackArgs args)
 
 void Analyze(TPacket* packet)
 {
+    printf("Analyzing ...\n");
+
     // Get payload
     uint8_t* payload;
     uint32_t payload_size;
@@ -84,6 +86,8 @@ void DnsDataCondition()
 
 void DnsStore()
 {
+    printf("Storing ...\n");
+
     TResolutionItem* prev_item = NULL;
     TResolutionItem* item = NULL;
     while((item = GetNextProcessedItem(prev_item)) != NULL)

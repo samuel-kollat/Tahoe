@@ -2,6 +2,8 @@
 
 bool mysql_save_dns_data(TResolutionItem* data_item)
 {
+    printf("Saving to MySQL ...\n");
+
     if(comm_mysql_connect() != COMM_MYSQL_OK)
     {
         fprintf(stderr, "[DNS] Could not connect to DB\n");
@@ -17,15 +19,22 @@ bool mysql_save_dns_data(TResolutionItem* data_item)
 
     char query[COMM_MYSQL_QUERY_SIZE];
     sprintf(query, " \
-        INSERT INTO DnsAnalyzerDatas \
-        (SrcIP, DstIp, SrcPort, DstPort, DomainName) \
-        VALUES \
-        (%s, %s, %u, %u, %s)",
+        INSERT INTO DnsAnalyzerDatas (SrcIP, DstIp, SrcPort, DstPort, DomainName) VALUES (\'%s\', \'%s\', \'%u\', \'%u\', \'%s\')",
         str_src_ip, str_dst_ip,
         data_item->resolution.query.src_port, data_item->resolution.query.dst_port,
         data_item->resolution.query.domain);
 
-    mysql_query(con, query);
+    printf("Query: %s", query);
+
+    unsigned mysql_res = mysql_query(con, query);
+    if(mysql_res != 0)
+    {
+        printf("Error: writing data to database: %u\n", mysql_res);
+    }
+    else
+    {
+        printf("Data stored.\n");
+    }
 
     return true;
 }
