@@ -43,6 +43,8 @@ void store_http_data(
     THttpData* data
 );
 
+THttpStats* get_list_start();
+
 void print_list(
 );
 

@@ -24,7 +24,7 @@ bool mysql_save_dns_data(TResolutionItem* data_item)
         data_item->resolution.query.src_port, data_item->resolution.query.dst_port,
         data_item->resolution.query.domain);
 
-    printf("Query: %s", query);
+    printf("Query: %s\n", query);
 
     unsigned mysql_res = mysql_query(con, query);
     if(mysql_res != 0)
@@ -34,6 +34,33 @@ bool mysql_save_dns_data(TResolutionItem* data_item)
     else
     {
         printf("Data stored.\n");
+    }
+
+    unsigned long last_id = mysql_insert_id(con);
+
+    // Resolution
+    if(data_item->resolution.response.data != NULL)
+    {
+        int i = 0;
+        while(data_item->resolution.response.data[i] != NULL)
+        {
+            char* str;
+            ip_to_str(data_item->resolution.response.data[i], &str);
+            sprintf(query, " \
+                INSERT INTO DnsResponseAddresses (IpAddress, DnsAnalyzerDataId) VALUES (\'%s\', \'%u\')",
+                str, last_id);
+            i++;
+
+            unsigned mysql_res = mysql_query(con, query);
+            if(mysql_res != 0)
+            {
+                printf("Error: writing data to database: %u\n", mysql_res);
+            }
+            else
+            {
+                printf("Data stored.\n");
+            }
+        }
     }
 
     return true;

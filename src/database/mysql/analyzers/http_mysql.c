@@ -19,7 +19,7 @@ bool mysql_save_http_data(THttpStats* data_item)
 
     sprintf(query, " \
         SELECT * FROM HttpAnalyzerDatas \
-        WHERE SourceIp = \'%s\' AND DestinationIp = \'%s\' AND Method = %d",
+        WHERE SourceIp = \'%s\' AND DestinationIp = \'%s\' AND Method = \'%d\'",
         str_src_ip, str_dst_ip, data_item->method);
     mysql_query(con, query);
     MYSQL_RES* result = mysql_store_result(con);
@@ -28,8 +28,8 @@ bool mysql_save_http_data(THttpStats* data_item)
     {
         sprintf(query, " \
             UPDATE HttpAnalyzerDatas \
-            SET Quantity=%u \
-            WHERE SourceIp = \'%s\' AND DestinationIp = \'%s\' AND Method = %d",
+            SET Quantity= %u \
+            WHERE SourceIp = \'%s\' AND DestinationIp = \'%s\' AND Method = \'%d\'",
             data_item->quantity,
             str_src_ip, str_dst_ip, data_item->method);
         mysql_query(con, query);
@@ -40,7 +40,7 @@ bool mysql_save_http_data(THttpStats* data_item)
             INSERT INTO HttpAnalyzerDatas \
             (SourceIp, DestinationIp, Method, Quantity) \
             VALUES \
-            (%s, %s, %u, %u)",
+            (\'%s\', \'%s\', \'%u\', %u)",
             str_src_ip, str_dst_ip,
             data_item->method, data_item->quantity);
         mysql_query(con, query);

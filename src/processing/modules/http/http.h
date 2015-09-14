@@ -27,6 +27,7 @@
 #include "../../protocols/parsers.h"
 #include "../../storing.h"
 #include "http_statistics.h"
+#include "../../../database/mysql/analyzers/http_mysql.h"
 
 #define HTTP_PROTO_STRING_SIZE 8
 

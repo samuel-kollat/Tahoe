@@ -90,3 +90,8 @@ void print_list()
         item = item->next;
     }
 }
+
+THttpStats* get_list_start()
+{
+    return head;
+}

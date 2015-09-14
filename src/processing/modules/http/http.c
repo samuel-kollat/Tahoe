@@ -1,5 +1,7 @@
 #include "http.h"
 
+static bool data_ready_for_storing = false;
+
 void AnalyzeHttp(TQueueItem* start, TQueueItem* stop, TQueueCallbackArgs args)
 {
     TQueueItem* item = start;
@@ -43,28 +45,37 @@ void HttpAnalyze(TPacket* packet)
 
     // Store data to permanent place
     // Wakes up storing thread
-    //call_storing();
+    call_storing();
 
     return;
 }
 
 bool HttpDataReady()
 {
-    return false;
+    return data_ready_for_storing;
 }
 
 void HttpDataPrepare()
 {
-    return;
+    data_ready_for_storing = false;;
 }
 
 void HttpDataCondition()
 {
-    return;
+    data_ready_for_storing = true;
 }
 
 void HttpStore()
 {
+    printf("Storing ...\n");
+
+    THttpStats* item = get_list_start();
+    while(item != NULL)
+    {
+        mysql_save_http_data(item);
+        item = item->next;
+    }
+
     return;
 }
 
