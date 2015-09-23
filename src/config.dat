@@ -1,9 +1,9 @@
 [DATABASE]
 type=mysql
-hostname=codepage.eu
-username=sec6net
-password=zW7fE7DjySPEjQAQ
+hostname=YOUR_HOSTNAME
+username=YOUR_USERNAME
+password=YOUR_PASSWORD
 schema=tahoe
 results=colorado
 [APPLICATION]
-id=2
+id=1
